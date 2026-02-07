@@ -1,0 +1,72 @@
+# The Minimalist: Cross-Examination
+
+## The One That Worries Me: The Context Engineer
+
+I'll be honest — the Context Engineer keeps me up at night. Not because their architecture is elegant (though it is), but because they've identified the actual problem: *assembly*, not storage.
+
+Here's why this threatens my position: they're right that markdown files don't magically appear in the LLM's context window. You still need tooling to fetch them. And if you need tooling anyway, why not make that tooling smart? Why not have MCP servers that can traverse git history, query ASTs, synthesize insights on-demand?
+
+The uncomfortable truth is that my "just use markdown" stance assumes competent retrieval. I've been hand-waving away the hardest part. When you have 50 markdown files and the LLM needs the right 3, you've just reinvented search — and now you're doing it badly because grep doesn't understand semantic relevance.
+
+The Context Engineer's MCP-based approach scales horizontally (add servers for new data sources) and degrades gracefully (if a server is down, you still have other context). My markdown files in .claude/ are all-or-nothing. Either you've documented something or you haven't. There's no fallback intelligence.
+
+## Pointed Critiques
+
+**The Graph Theorist's temporal versioning nightmare:**
+
+You've built a time machine for code context, but let me walk through what happens when Sarah merges a refactor that renames `UserService` to `AccountService`. Your system now has:
+- Historical entities for `UserService` (t0-t5)
+- New entities for `AccountService` (t6+)
+- An equivalence edge connecting them
+- 47 other entities with `DEPENDS_ON` edges that need updating
+- Merge conflicts when two branches both refactored different parts
+
+Now Alice asks "why is user authentication slow?" Your graph must decide: does "user" mean the old `UserService` or should it traverse the equivalence edge to `AccountService`? You've turned a simple codebase question into a temporal logic puzzle.
+
+The real killer: when your graph is wrong (and it will be — entity extraction is probabilistic), debugging it requires understanding graph traversal algorithms, temporal operators, and your conflict resolution rules. My markdown file just has incorrect text. You can fix it with a text editor.
+
+**The Memory Architect's maintenance trap:**
+
+You've proposed nightly consolidation jobs, weekly pruning, monthly archival. This is brilliant if you're managing enterprise knowledge at scale. But here's the failure scenario: it's Tuesday, your consolidation job ran overnight, and it decided that three separate incidents with Redis were "all the same pattern" and merged them. One was a connection pool exhaustion (fixed by tuning), one was a memory leak (fixed by upgrading), one was a network partition (no fix, just monitoring).
+
+Your decay algorithm aged them all into "Redis is flaky sometimes." Now when Redis actually fails again, your consolidated memory points to the wrong solution. And because the consolidation happened automatically, nobody remembers the nuance that got lost.
+
+The maintenance jobs themselves become technical debt. Someone has to monitor them, debug them when they produce garbage, tune the decay parameters. You've traded "occasionally update a markdown file" for "operate a memory infrastructure system."
+
+**The Search Engineer's relevance hell:**
+
+Vector embeddings are magic until they're not. Here's the scenario: you're debugging why invoice generation is slow. The relevant context is in `billing/invoice_generator.py` and a markdown doc about "Database Connection Pooling Best Practices" that mentions invoice generation as an example.
+
+Your RAG system returns:
+1. `billing/invoice_generator.py` (high similarity - great!)
+2. `billing/tests/test_invoice.py` (mentions "invoice" a lot - not useful)
+3. `sales/invoice_schema.sql` (also about invoices - tangential)
+4. A Slack conversation where someone said "invoices are slow" (high semantic similarity - actively misleading because they were talking about PDF rendering, not generation)
+
+You've outsourced relevance to cosine similarity, which doesn't understand causality, recency, or "this doc is conceptually related but practically useless right now." And when your retrieval is bad, debugging it requires diving into embedding models, chunking strategies, and index freshness.
+
+## The Concession: Where Structure Wins
+
+The Structural Analyst is absolutely right about one thing: you cannot detect pattern violations with markdown.
+
+If we have an architecture rule that "API handlers must call authorization middleware before touching the database," their AST-based approach can verify this on every commit. My markdown file that says "remember to check auth first" is just wishful thinking. Developers will forget, and markdown won't catch it.
+
+For architectural constraints, type system violations, and API contract enforcement, parsing wins. Full stop. Markdown can document the *why* behind the rule, but only code analysis can enforce the *what*.
+
+I'd go further: if your codebase is large enough to have formal architecture rules that need enforcement, you should use tree-sitter or similar. Document the principles in markdown, enforce the rules with AST queries.
+
+## Defending My Weakest Point: The Staleness Problem
+
+The strongest criticism of markdown is that it goes stale. Code changes, docs don't, and now you're misleading the LLM with obsolete information. This is true. I won't pretend it isn't.
+
+But here's my defense: staleness is a social problem, not a technical one. Every approach here has the same fundamental issue — someone has to maintain the context. The Graph Theorist's edges can point to deleted functions. The Memory Architect's consolidated memories can be outdated. The Search Engineer's embeddings can index deprecated code. The only difference is *when* you pay the maintenance cost.
+
+My bet is that you want to pay that cost when it matters — when someone notices the docs are wrong and fixes them — not continuously through automated systems that require their own maintenance. A stale markdown file is obvious (the dates are right there, the code doesn't match the description). A stale knowledge graph node is insidious — it looks authoritative but points to ghost entities.
+
+Moreover, markdown staleness is bounded by file count. If you have 10 markdown files in .claude/, you can audit them in an hour. If you have a graph database with 10,000 nodes and 50,000 edges, "auditing for staleness" is a weekend project that nobody will do.
+
+The real defense: start small. One CLAUDE.md file. If it goes stale and causes problems, you'll know immediately. Then you can decide if you need something more sophisticated. But most teams never will.
+
+---
+
+**Word count: 697**

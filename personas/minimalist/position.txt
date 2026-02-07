@@ -1,0 +1,133 @@
+POSITION PAPER: THE CASE FOR RADICAL SIMPLICITY IN AI CODING CONTEXT
+
+Core Thesis: Documentation You Can See in a Git Diff Wins
+
+After two decades of watching developers build elaborate systems that collapse under their own weight, I've learned one fundamental truth: the best documentation system is the one that survives contact with reality. Complex indexing pipelines, knowledge graphs, and dynamic assembly systems all share a fatal flaw—they add invisible layers between the developer and their code. When something breaks, you can't see it in a git diff. When the codebase evolves, these systems become archaeological artifacts, frozen in time while the code marches forward.
+
+My position is simple: markdown files in version control, organized in .llm-docs directories alongside your code, with CLAUDE.md files for team conventions and .cursorrules for project-specific patterns. Nothing more. This isn't a lack of ambition—it's a battle-tested recognition that the simplest system that works will outlast the cleverest system that doesn't.
+
+How It Works in Practice: A Living System That Scales Down
+
+The architecture is deliberately mundane. At your project root, you create a .llm-docs directory. Inside, you maintain focused markdown files organized by domain: testing.md, architecture.md, deployment.md, security.md. Each file answers the questions an AI (or new developer) will actually ask.
+
+Your CLAUDE.md sits at the root and contains team-wide conventions: how you write tests, what patterns you avoid, architectural decisions that aren't obvious from reading the code. It's the institutional memory that would otherwise live in someone's head or a Confluence page no one reads.
+
+The .cursorrules file (despite the name, it works for any AI) contains project-specific patterns: "We use RSpec request specs, not controller specs," "All background jobs must be idempotent," "Never use Rails concerns for business logic."
+
+The workflow is brutally simple. When you make an architectural decision, you update the relevant markdown file in the same commit. When you review a PR, you review the documentation changes alongside the code changes. When the docs drift from reality, it's immediately visible—someone opens a PR updating just the code, and the reviewer asks "shouldn't we update testing.md to reflect this pattern?"
+
+This is the critical insight: by keeping documentation in version control, synchronized with code changes, you get automatic staleness detection through the PR review process. There's no background indexer to fail silently. No cache invalidation problem. No "rebuild the graph" maintenance task that never gets prioritized.
+
+Concrete Example: Rails Project Documentation That Prevents AI Slop
+
+Let me show you what good .llm-docs content looks like for a Rails application, specifically designed to prevent the kind of low-value AI-generated test slop that plagues modern codebases.
+
+In .llm-docs/testing.md:
+
+TESTING PHILOSOPHY
+
+We write behavior tests, not implementation tests. A test should verify that the system does what users need, not that files exist or database columns are spelled correctly.
+
+ANTI-PATTERNS TO AVOID
+
+DO NOT write tests that verify migration structure. If a migration adds a user.email field, DO NOT write a test like: expect(User.column_names).to include('email'). The migration itself is the specification. If it runs successfully, the column exists.
+
+DO NOT write tests that verify file existence. No tests like: expect(File.exist?('app/models/user.rb')).to be true. If the file doesn't exist, the code won't load.
+
+DO NOT write tests that simply echo the implementation. If your controller action does: @user = User.find(params[:id]), don't write: expect(User).to receive(:find).with('123'). Instead, test the behavior: expect(response).to have_http_status(:success) and expect(response.body).to include(user.name).
+
+WHAT TO TEST INSTEAD
+
+Test user-facing behavior. For an e-commerce checkout flow: "When a user submits payment, they receive a confirmation email and the order status changes to 'processing'."
+
+Test edge cases and error conditions. "When payment fails, the order remains in 'pending' state and the user sees an error message."
+
+Test business logic that could silently break. "Premium users receive 20% discount, calculated before tax, excluding sale items."
+
+TESTING CONVENTIONS
+
+We use RSpec request specs for testing HTTP endpoints, not controller specs. Request specs test the full stack including routing, middleware, and response rendering.
+
+We use system specs (Capybara) for critical user journeys: signup, checkout, password reset. Keep these minimal—they're slow.
+
+Background jobs are tested with ActiveJob::TestHelper using perform_enqueued_jobs. Jobs must be idempotent because production environments retry on failure.
+
+This documentation directly addresses the AI slop problem by being prescriptive about what not to do. When an AI suggests generating a test file, it reads these conventions first and understands that testing file existence is explicitly forbidden. When it considers testing database schema, it sees the clear anti-pattern warning.
+
+In .llm-docs/architecture.md:
+
+SERVICE OBJECTS AND BUSINESS LOGIC
+
+We use service objects for multi-step business operations. Naming convention: VerbNoun (CreateOrder, ProcessPayment, SendNotification).
+
+Service objects go in app/services/ and have a single public method: call. They return a Result object with success?, error_message, and data attributes.
+
+WHY NOT RAILS CONCERNS
+
+We avoid Rails concerns for business logic. Concerns encourage horizontal slicing that scatters related behavior across files. If you're tempted to create a concern, consider: 1) Is this behavior that belongs in a service object? 2) Is this a genuine cross-cutting concern like Timestampable? 3) Can this be a composed object instead?
+
+BACKGROUND JOB PATTERNS
+
+All Sidekiq jobs must be idempotent. Use unique_for with sidekiq-unique-jobs to prevent duplicate processing.
+
+Jobs should be small and single-purpose. If a job does more than one thing, split it and use workflow orchestration.
+
+Failed jobs retry with exponential backoff. Jobs that exhaust retries go to dead queue for manual investigation—we get Slack alerts.
+
+This level of specificity prevents the AI from generating boilerplate that violates team conventions. It won't suggest a concern for business logic because the docs explicitly explain why we don't do that.
+
+The Staleness Problem: Solved by Process, Not Technology
+
+Critics will point to staleness as the Achilles heel of static documentation. They're not wrong to worry—markdown files can drift from reality. But here's what I've learned: every documentation system faces staleness. The difference is whether you can see it happening.
+
+RAG systems with AST indexing become stale when the indexer breaks and no one notices for three months. Knowledge graphs become stale when the code structure changes but the graph update pipeline isn't maintained. Hybrid memory systems become stale when developers don't understand how to trigger cache invalidation.
+
+Markdown files become stale when someone commits code without updating docs—and that's visible in the PR diff. The solution isn't technical, it's cultural: make documentation review part of code review. When someone adds a new testing pattern without updating testing.md, the reviewer asks for it. When someone makes an architectural decision without documenting it, it's flagged before merge.
+
+This is a social contract, not a technical system. And that's the point. Technical systems fail silently. Social contracts fail loudly, in the PR review where they can be fixed.
+
+The practical workflow: treat .llm-docs changes as first-class code changes. If the PR adds a new service object pattern, it should update architecture.md. If it changes how we test background jobs, it should update testing.md. Over time, developers internalize this: "I'm changing how we do X, so I should document it."
+
+For active areas of the codebase, docs stay current because they're touched frequently. For stable areas, docs stay accurate because the code isn't changing. When docs do drift, it's usually caught when someone (human or AI) tries to use them and notices the mismatch—then they fix it in place.
+
+Honest Weaknesses: Where This Approach Falls Short
+
+I'd be lying if I claimed markdown files solve every problem. They don't, and intellectual honesty demands I acknowledge the gaps.
+
+First, discoverability suffers at scale. In a 500-file codebase, knowing which .llm-docs/testing.md file to read requires understanding the domain structure. There's no automatic "show me all testing conventions that apply to payment processing." You have to know where to look. RAG systems genuinely excel here—they surface relevant docs without requiring structural knowledge.
+
+Second, markdown doesn't capture runtime behavior. You can document "payment jobs are idempotent" but you can't automatically verify it. AST analysis could detect idempotency violations through static analysis. Temporal knowledge graphs could track which code paths actually execute during payment processing. I'm giving up those capabilities.
+
+Third, cross-cutting concerns are hard to document without repetition. If authentication logic touches controllers, services, background jobs, and GraphQL resolvers, do you document it four times or create a separate auth.md that developers must remember to consult? There's no perfect answer—either you repeat yourself or you fragment context.
+
+Fourth, onboarding new team members requires more active guidance. With a RAG system, you can ask "how do we test payment processing?" and get an automatic synthesis. With markdown, someone needs to point the new developer to the right files. This doesn't scale to very large teams with high turnover.
+
+Fifth, there's no feedback loop to detect incomplete documentation. If testing.md doesn't mention how to test WebSocket connections and no one asks about it, the gap remains invisible. More sophisticated systems could detect untested patterns or undocumented conventions through code analysis.
+
+These weaknesses are real. I'm not going to hand-wave them away with "but simplicity!" The question is whether the problems they solve are worth the complexity they introduce.
+
+Where This Approach Fits Best: The Goldilocks Zone
+
+Every system has a sweet spot. For markdown-based documentation, it's teams of 3-15 developers working on codebases between 10,000 and 200,000 lines of code, where the system has reached some architectural stability but is still actively evolving.
+
+Too small (solo developer, <10k LOC), and you don't need much documentation at all—the code is simple enough to understand directly. Too large (50+ developers, >500k LOC), and the discoverability problems become genuinely painful. At that scale, investing in RAG or more sophisticated tooling starts to pay dividends.
+
+The approach works best for teams that practice code review seriously. If PRs are rubber-stamped, the social contract that keeps docs current breaks down. You need a culture where reviewers actually read documentation changes and think critically about whether they match the code changes.
+
+It's ideal for projects past the MVP stage but not yet at enterprise scale. During rapid prototyping, any documentation overhead slows you down—just write code and figure it out later. At enterprise scale, you have the resources to maintain sophisticated tooling. But in the middle, where most software lives, markdown documentation hits the sweet spot of low overhead and high value.
+
+It works particularly well for teams with some skepticism about AI-generated code. If your team is already worried about AI slop, making conventions explicit in version-controlled docs gives you a clear mechanism for improvement. You can point to testing.md and say "the AI violated our documented standards," then update the docs to be more prescriptive.
+
+Conversely, it works poorly for teams that don't believe in documentation at all. If your culture is "read the code," markdown files won't help—they'll just rot. This system requires buying into the premise that explicit documentation has value.
+
+Why I Believe What I Can See
+
+I've watched too many sophisticated systems fail to trust complexity anymore. I've seen Elasticsearch clusters that indexed codebases but no one maintained the mappings. I've seen knowledge graphs that became political footballs when different teams wanted different schemas. I've seen caching layers that served stale data for months because the invalidation logic had subtle bugs.
+
+The common thread: when things broke, you couldn't see it in a git diff. The failures were in layers of abstraction invisible to normal development workflows. By the time someone noticed, the system was so stale it was easier to abandon than fix.
+
+Markdown files aren't glamorous. They don't enable the fancy queries that impress in demos. But they survive. They survive because they're simple enough that every developer understands them. They survive because git already knows how to version, merge, and diff them. They survive because when they're wrong, it's obvious.
+
+I'm not against sophisticated systems on principle. I'm against systems that add complexity without proportional value. For most teams, most of the time, markdown documentation is enough. Not because it's the most powerful solution, but because it's the most robust one.
+
+In software, robust usually beats clever. Markdown-based AI context is robust.

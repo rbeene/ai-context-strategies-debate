@@ -1,0 +1,139 @@
+THE CONTEXT ENGINEER: ASSEMBLY OVER STORAGE
+
+A Position Paper on Dynamic Context Engineering for AI Coding Agents
+
+
+CORE THESIS: THE REAL BOTTLENECK IS ATTENTION, NOT STORAGE
+
+We've been solving the wrong problem. The debate about AI coding quality has fixated on storage architectures—should we use RAG? Build knowledge graphs? Index ASTs?—when the actual constraint is staring us in the face: a 200K token context window and an attention curve that degrades with distance.
+
+Storage is a red herring. You can have perfect recall of your entire codebase and still generate slop if you feed the model 50K tokens of marginally relevant context. The breakthrough insight is this: what matters is assembling the RIGHT 5-10 pieces of context at inference time and putting them in the right order.
+
+This is context engineering. It's a new discipline that sits between information retrieval and prompt engineering, focused on the pipeline that selects, orders, and presents context to the model at the exact moment of generation. If traditional approaches ask "how do we store everything?", context engineering asks "how do we assemble exactly what's needed, right now?"
+
+
+HOW IT WORKS: THE CONTEXT ASSEMBLY PIPELINE
+
+Context engineering is built on four pillars:
+
+1. MCP Servers for Dynamic Retrieval
+Model Context Protocol servers act as live context sources that respond to queries at inference time. Instead of pre-indexing your codebase into a static store, MCP servers query the actual code when needed. Need to understand how authentication works? The MCP server searches for auth-related patterns, extracts relevant classes, and returns structured context. The key: this happens on-demand, not ahead of time.
+
+2. Skills as Reusable Context Patterns
+Skills encapsulate the context assembly patterns that recur across your project. A /create-ticket skill doesn't just execute commands—it knows the exact context needed for ticket creation: the project's conventions document, examples of well-formed tickets, the current sprint structure. Skills are context templates that automatically pull in the right information.
+
+3. Hooks for Output Validation
+PreToolUse and PostToolUse hooks intercept the agent's actions to validate against current standards. Before committing a test file, a hook checks: does this match our project's testing patterns? Does it avoid known anti-patterns? Hooks enforce context validity at the boundaries.
+
+4. Progressive Context Building
+Start broad, narrow iteratively. When investigating a bug, the context pipeline begins with high-level architecture (which services are involved?), then narrows to specific files (where's the error occurring?), then to functions (what's the exact logic?). Each step informs the next query. The model never drowns in irrelevant detail.
+
+The key insight: you don't need to store everything if you can FIND everything at the right moment. Context engineering shifts the problem from storage optimization to retrieval orchestration.
+
+
+CONCRETE EXAMPLE: WRITING A RAILS CONTROLLER TEST
+
+Consider an agent tasked with writing a test for a Rails controller. Here's the context assembly pipeline:
+
+Step 1: Query MCP Server for Controller Structure
+The MCP server examines the controller file, extracts its public methods, identifies dependencies (which models does it use? which services?), and returns a structured summary. The agent now understands WHAT needs testing without seeing 500 lines of implementation detail.
+
+Step 2: Retrieve Test Exemplars
+The pipeline searches for 2-3 existing test files for similar controllers. Not random tests—similar ones. If we're testing an API controller, find other API controller tests. If it's a CRUD controller with auth, find CRUD+auth tests. These become the stylistic exemplars.
+
+Step 3: Load Testing Conventions Skill
+The /test-conventions skill activates, bringing in project-specific patterns: "We use RSpec with FactoryBot. We test behavior, not implementation. We use request specs for controllers, not controller specs. Our factories live in spec/factories and follow this naming pattern..."
+
+Step 4: Apply PreToolUse Hook
+Before writing the test file, a hook intercepts and checks against anti-patterns:
+- Does it test column existence? (Reject: that's a schema test, not a behavior test)
+- Does it test file existence? (Reject: not our pattern)
+- Does it use deprecated factory syntax? (Reject: we updated our conventions last sprint)
+
+The agent writes the test. It looks like YOUR tests because it only saw YOUR patterns. It avoids slop because slop patterns were filtered out before they entered the context window.
+
+This is the pipeline in action. At no point did we load generic RSpec documentation or dump the entire test directory into context. We assembled exactly what was needed, in the order that made sense, with validation at the boundaries.
+
+
+ADDRESSING AI SLOP: PREVENTION AT THE SOURCE
+
+AI slop—generic, non-idiomatic, pattern-violating code—is a context contamination problem. Models generate slop when they see slop in their context or when they lack specific patterns to follow.
+
+Context engineering prevents slop at the source by controlling the model's field of view:
+
+- If the model never sees a "test that migration adds column" example, it won't generate one
+- If it only sees behavior-driven test examples from YOUR codebase, it generates behavior-driven tests
+- If every context assembly includes your project's conventions skill, it can't drift toward generic patterns
+
+This is fundamentally different from post-generation filtering. We're not catching slop after it's written—we're preventing the model from having the context that would generate slop in the first place.
+
+Martin Fowler's recent work on context engineering for coding agents emphasizes this principle: the quality of AI-generated code is bounded by the quality of its context. Give it muddy, generic context, get muddy generic code. Give it precise, project-specific context, get precise project-specific code.
+
+
+ADDRESSING STALENESS: LIVE QUERIES OVER STATIC CACHES
+
+Static documentation goes stale the moment it's written. RAG indices become outdated when code changes. Knowledge graphs require maintenance.
+
+Context engineering sidesteps staleness through live queries:
+
+- MCP servers query actual code files at inference time. The authentication patterns they return are whatever exists RIGHT NOW in the codebase.
+- Skills can be versioned and updated alongside code. When testing conventions change, update the skill. Next invocation uses the new version.
+- Hooks enforce current standards because they're code that executes, not documentation that rots.
+
+There's no static cache to go stale. Every context assembly is fresh because every assembly queries the current state of the codebase.
+
+This matters especially for rapidly evolving projects. If you refactor your API authentication from JWT to session-based, an MCP server reflects that change immediately. A static RAG index requires reindexing. Documentation requires rewriting.
+
+
+HONEST ACKNOWLEDGMENT: THE WEAKNESSES
+
+Context engineering is not a silver bullet. It has real weaknesses:
+
+Complexity of Building MCP Servers: Creating effective MCP servers requires understanding both the domain (what context is relevant for Rails controllers?) and the retrieval mechanics (how do we query for it efficiently?). This is non-trivial engineering work.
+
+Context Engineering is a Skill: Knowing what context to assemble, in what order, with what priority—this is a craft that requires expertise. Not every team has developers who think in terms of context pipelines.
+
+Latency of Dynamic Retrieval: Live queries take time. Each MCP server call adds latency. For complex context assemblies requiring 5-7 retrieval steps, this compounds. Static caches are faster.
+
+The Chicken-and-Egg Problem: You need good context engineering to build good context engineering tools. The initial investment is steep because you're building the tools while learning the discipline.
+
+Token Costs of Retrieval: Dynamic retrieval can be wasteful. If your MCP server returns 10K tokens but only 500 are relevant, you've burned 9.5K tokens. Effective context engineering requires precise queries, which requires... expertise in context engineering.
+
+These are not fatal flaws, but they're real. Teams adopting context engineering should expect a learning curve and upfront investment.
+
+
+WHERE THIS FITS BEST: THE IDEAL ENVIRONMENT
+
+Context engineering thrives in specific environments:
+
+Teams Already Using Agent-Based Tools: If you're using Claude Code, Cursor with agent mode, or similar tools, you're already in the agent paradigm. Context engineering is the natural next step.
+
+Mature MCP Ecosystems: Projects where MCP servers exist for your stack (Rails, React, PostgreSQL) can leverage existing tools. Building from scratch is harder.
+
+Teams That Can Invest in Custom Tooling: Context engineering often requires custom MCP servers for domain-specific patterns. This requires engineering capacity.
+
+Rapidly Evolving Codebases: Where static documentation can't keep up, live queries shine. If your architecture changes monthly, context engineering stays current automatically.
+
+Projects with Strong Conventions: Context engineering amplifies existing patterns. If your codebase is chaotic, context engineering will surface chaos. If it's well-structured, context engineering propagates that structure.
+
+
+CONCLUSION: A NEW ENGINEERING DISCIPLINE
+
+We stand at the emergence of a new discipline. Context engineering is to AI coding agents what information architecture is to databases—the practice of structuring, retrieving, and presenting information for optimal use.
+
+The architecture is clear: MCP servers for dynamic retrieval, skills for reusable patterns, hooks for validation, progressive building for focus. The tools exist in the Claude Code ecosystem. The principles are sound.
+
+What's needed now is practitioners—developers who understand that the bottleneck is not storage but assembly, not what you CAN retrieve but what you SHOULD present, not the size of the context window but the precision of what fills it.
+
+Storage is solved. Retrieval is solved. Assembly is the frontier.
+
+That's where context engineering lives.
+
+
+---
+
+References:
+- Martin Fowler's work on context engineering for coding agents
+- Model Context Protocol (MCP) specification and ecosystem
+- Claude Code architecture: skills, hooks, and subagents
+- Attention degradation in transformer models (200K context window dynamics)

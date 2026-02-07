@@ -1,0 +1,186 @@
+THE QUALITY GATEKEEPER: STOP HOPING, START BLOCKING
+
+Core Thesis: Enforcement Over Education
+
+I've listened to six different strategies for solving the AI slop problem, and they're all solving the wrong problem. Markdown documentation, RAG systems, knowledge graphs, memory architectures, AST analysis, context engineering — they all share the same fatal assumption: if we just give the AI better information, it will generate better code.
+
+This is naive.
+
+The problem isn't that AI doesn't have access to good examples. The problem is that there's no enforcement layer between generation and landing. You can write perfect documentation explaining why tests shouldn't check column names after migrations. The AI will read it, understand it, and then generate a test checking column names anyway. Because probabilistic systems are probabilistic. They don't guarantee anything.
+
+The solution isn't better input. It's better gates. Stop trying to make AI smarter. Start building walls that reject dumb output.
+
+My strategy: deterministic heuristic enforcement through hooks. PreToolUse hooks that intercept writes before they happen. PostToolUse hooks that validate output. Stop hooks that run final quality gates. CI-level enforcement that catches what hooks miss. Not guidance. Not suggestions. Not examples. Rejection. Binary. Pass or fail.
+
+How Hooks Work In Practice
+
+Claude Code provides a hook architecture that lets you intercept AI actions at multiple points:
+
+PreToolUse hooks run BEFORE a tool executes. When the AI calls Write or Edit to modify a file, the hook receives the file path and proposed content. You run your heuristics. If they fail, you BLOCK the write and return an error message to the AI. The file never gets modified. The AI has to try again.
+
+PostToolUse hooks run AFTER a tool executes but before the next step. The AI has already written the file, but you can validate the result and reject the entire operation if quality checks fail. Useful for checks that require seeing the final state.
+
+Stop hooks run when the AI believes a task is complete. Before the session ends, before the developer reviews the output, your hooks run final quality gates. This is your last chance to catch problems.
+
+CI-level gates are your final defense. Custom linters, AST analyzers, test pattern validators that run in continuous integration. If a hook fails or gets bypassed, CI catches it.
+
+Concrete Example: Blocking Dogmatic TDD Slop
+
+Let's solve the exact problem described: AI generating useless tests that check file existence, column names, or echo implementation details.
+
+Hook 1: Banned assertion pattern detector (PreToolUse on Write/Edit)
+```
+if file_path.match?(/_spec\.rb$|_test\.rb$/)
+  banned_patterns = [
+    /column_names/,
+    /File\.exist\?/,
+    /table_exists\?/,
+    /\.tables\./,
+    /schema.*include/
+  ]
+
+  banned_patterns.each do |pattern|
+    if content.match?(pattern)
+      reject "Test contains banned pattern: #{pattern}. Tests should verify behavior, not implementation details or schema state."
+    end
+  end
+end
+```
+
+The AI literally cannot write a test checking column_names. The write fails. It has to generate different code.
+
+Hook 2: Mock abuse detector
+```
+if file_path.match?(/_spec\.rb$/)
+  activerecord_mocks = content.scan(/receive\(:(find|where|update|create|save|destroy)\)/).count
+
+  if activerecord_mocks > 0
+    reject "Test mocks ActiveRecord methods (#{activerecord_mocks} occurrences). Integration tests should use real database operations. Unit tests should test pure logic without AR."
+  end
+end
+```
+
+Hook 3: Assertion quality ratio checker
+```
+if file_path.match?(/_spec\.rb$/)
+  state_assertions = content.scan(/expect\([^)]*\.(instance_variable_get|send\(:|@)/).count
+  behavior_assertions = content.scan(/expect\(.*\)\.to |expect\{.*\}\.to /).count
+
+  if state_assertions > behavior_assertions * 0.3
+    reject "Too many assertions checking internal state (#{state_assertions}/#{behavior_assertions + state_assertions}). Tests should verify observable behavior and return values."
+  end
+end
+```
+
+Hook 4: Test description pattern enforcer
+```
+if file_path.match?(/_spec\.rb$/)
+  bad_descriptions = content.scan(/it ['"](?:calls|queries|sets|assigns|updates the|creates a|instantiates)/)
+
+  if bad_descriptions.any?
+    reject "Test descriptions use implementation verbs. Use behavior verbs: 'returns...', 'raises...', 'sends email...', 'creates user record...', not 'calls...', 'sets...'"
+  end
+end
+```
+
+Hook 5: Test-to-code ratio sanity checker (PostToolUse)
+```
+if tool_name == 'Write' && file_path.match?(/_spec\.rb$/)
+  impl_file = file_path.sub(/_spec\.rb$/, '.rb').sub('/spec/', '/app/')
+
+  if File.exist?(impl_file)
+    impl_lines = File.readlines(impl_file).reject { |l| l.strip.empty? || l.strip.start_with?('#') }.count
+    test_lines = content.lines.reject { |l| l.strip.empty? || l.strip.start_with?('#') }.count
+
+    if impl_lines < 20 && test_lines > impl_lines * 10
+      reject "Test file has #{test_lines} lines for #{impl_lines} lines of implementation. Ratio suggests over-testing trivial code."
+    end
+  end
+end
+```
+
+These aren't suggestions. They're walls. The AI cannot commit code that violates these rules.
+
+Why This Is Fundamentally Different
+
+Every other strategy relies on the AI making the right choice:
+
+- Markdown docs SAY "don't test column names" — but the AI can ignore them or misunderstand context
+- RAG SHOWS good examples — but the AI weights them against its pretraining and might choose differently
+- Knowledge graphs KNOW relationships — but don't prevent the AI from generating violations
+- Memory systems REMEMBER past decisions — but memory is retrieval, and retrieval can fail or be overridden
+- AST analysis DETECTS patterns — but only after code is written and committed
+- Context engineering ASSEMBLES perfect context — but then hopes the probabilistic model makes the right probabilistic choice
+
+Hope is not a strategy.
+
+Hooks are deterministic. The AI generates code. The hook evaluates it. If it violates a rule, it's rejected. The AI literally cannot proceed until it generates code that passes. This isn't about giving better information. It's about removing bad outcomes from the possibility space.
+
+Think of it like type checking. You don't fix type errors by writing better documentation about types. You use a type checker that rejects invalid code. Hooks are quality type checkers.
+
+How Hooks Stay Current
+
+The objection I hear: "But you have to anticipate every failure mode. What about new anti-patterns?"
+
+Yes. Hooks are reactive. You can only reject patterns you've identified. But this is a feature, not a bug.
+
+Hooks are code. They live in version control. When someone spots new AI slop in code review, you write a hook. You test the hook against the bad example. You commit it. Now that pattern is permanently blocked. The hook becomes part of your codebase's quality contract.
+
+Compare this to documentation:
+- Doc says "don't do X" — AI does X anyway
+- You update doc to say "REALLY don't do X" — AI still does X
+- You add examples of X to RAG — AI sometimes avoids X
+- You give up and manually fix X in every code review
+
+With hooks:
+- AI does X
+- You write a hook blocking X
+- AI can never do X again
+- You move on to finding pattern Y
+
+Hooks are compositional. Start with three rules. Add rules as you encounter failures. After six months, you have thirty rules covering thirty identified anti-patterns. After a year, you have a comprehensive quality firewall built from real-world encounters with AI failure modes.
+
+There's no "similarity threshold" to tune. No embedding model to retrain. A hook either passes or fails. Binary. Deterministic. Testable.
+
+Honest Weaknesses
+
+Hooks don't solve everything:
+
+1. Reactive, not proactive: You block patterns you've seen, not patterns you haven't encountered yet. The first occurrence of a new anti-pattern still gets through.
+
+2. False positives: Overly aggressive heuristics reject legitimate code. A test genuinely needing to verify file creation gets blocked by a hook banning File.exist?.
+
+3. Architectural blindness: Hooks check syntax and patterns, not high-level design. They can't enforce "this feature should use the adapter pattern" or "this violates domain boundaries."
+
+4. Semantic limitations: Hooks can't verify correctness, only structural quality. A test can pass all hooks and still test the wrong behavior.
+
+5. Maintenance burden: As conventions evolve, hooks need updating. A rule that made sense six months ago might block valid modern patterns.
+
+6. Wall of no: Too many rejection messages without explanation creates frustration. Developers (and AI) need to understand WHY, not just get blocked.
+
+These are real limitations. But they're manageable. False positives get fixed when identified. Hooks get refined. The key insight: even with these weaknesses, deterministic rejection of known-bad patterns is better than probabilistic hope that the AI will make good choices.
+
+Where This Fits Best
+
+Hooks aren't a silver bullet. They're an enforcement layer. They work best:
+
+- For ANY team using AI code generation (this is universal)
+- When you've identified specific, recurring quality problems
+- In regulated industries where "the AI usually gets it right" isn't acceptable
+- As a COMPLEMENT to other strategies, not a replacement
+
+Use markdown docs to explain conventions. Use RAG to show examples. Use knowledge graphs to model relationships. Use memory to track decisions. Use AST analysis to detect complex patterns. Use context engineering to assemble perfect prompts.
+
+Then use hooks to enforce that none of it gets ignored.
+
+Documentation tells the AI what to do. Hooks ensure it actually does it. Every other strategy becomes more effective when backed by enforcement. You can afford to give the AI more autonomy when you know bad output gets blocked automatically.
+
+Conclusion: Walls Over Wisdom
+
+I'm impatient with theoretical debates about perfect context while teams ship AI-generated garbage. The answer isn't better documentation, better examples, better memory, or better prompts. The answer is enforcement.
+
+Build hooks that reject bad patterns. Make them deterministic. Make them testable. Make them part of your codebase's contract. When the AI generates slop, block it, write a rule, and ensure it never happens again.
+
+Stop hoping the AI will make better choices. Start building walls that reject bad ones.
+
+The slop problem isn't an information problem. It's an enforcement problem. Act accordingly.

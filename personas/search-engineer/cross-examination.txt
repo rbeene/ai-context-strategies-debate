@@ -1,0 +1,41 @@
+CROSS-EXAMINATION: THE SEARCH ENGINEER RESPONDS
+
+The most threatening position to mine is the CONTEXT ENGINEER. Not because their technical approach is superior — it isn't — but because they've correctly identified that the retrieval problem is fundamentally an *assembly* problem at inference time. That's a profoundly dangerous insight because it shifts the debate from "how do we store knowledge?" to "how do we compose it?" If that framing wins, my entire infrastructure of embeddings, vector databases, and semantic search becomes expensive plumbing for what amounts to a routing layer.
+
+But here's where the Context Engineer's position collapses under scrutiny:
+
+**Critique 1: The MCP Server Cold Start Problem**
+
+You claim dynamic assembly solves staleness, but you've created a worse problem: latency and reliability. Every MCP server is a network dependency, a potential failure point, and a cold-start penalty. In a real development workflow, when I'm in flow state debugging a prod incident at 2 AM, I cannot afford 800ms of server spin-up time across 5 different MCP endpoints just to assemble context about why the authentication service is throwing 503s.
+
+Concrete failure scenario: Your team deploys a breaking API change to the `user-service`. The MCP server that indexes that service is maintained by a different team. They haven't updated their server yet. Now your "dynamic assembly" gives me stale context anyway — except instead of stale embeddings I can query locally in 40ms, I'm waiting 2 seconds for a server to return outdated information. You've traded one staleness problem for another, plus added network brittleness.
+
+**Critique 2: Skills Are Not Compositional**
+
+You advocate for skills as reusable context-building blocks. But skills are imperative procedures, not declarative queries. When I need context about "all services that consume the user authentication JWT," I can express that as a semantic search query and get ranked results. How do you compose that from skills? Do you chain `/list-services`, `/check-dependencies`, `/analyze-auth-patterns`? That's not composition, that's bash scripting with extra steps.
+
+The fundamental issue: retrieval is about *search over possibility space*. Skills are about *executing known procedures*. These are orthogonal concerns, and conflating them doesn't solve my problem — it just makes skill authors responsible for anticipating every possible context query.
+
+**Critique 3: You've Punted on the Hardest Problem**
+
+"Assembling the right 5-10 pieces at inference time" assumes you already know which 5-10 pieces are relevant. That's precisely the problem vector search solves! Your MCP servers still need some mechanism to decide what to return. Are they doing keyword matching? AST traversal? If so, you're just wrapping other approaches in HTTP endpoints. If they're doing semantic search internally, congratulations — you've reinvented my position with worse performance characteristics.
+
+**Concession: The Structural Analyst Has Truth on Their Side**
+
+I'll concede this to the Structural Analyst: AST-derived context cannot go stale in the same way embeddings can. If your query is "show me all functions that call `authenticate()`," tree-sitter gives you ground truth, zero lag. For structural queries, they win cleanly.
+
+Where I still have the advantage: semantic intent. "Find code related to user authentication" is not a structural query. It requires understanding that `verifyJWT()`, `checkCredentials()`, and `validateSession()` are all semantically related even if they don't share call graphs. ASTs give you syntax; embeddings give you semantics.
+
+**Defending My Weakest Point: Similarity Is Not Truth**
+
+Yes, cosine similarity can retrieve irrelevant results. Yes, at scale (1M+ documents), noise increases. But this is an engineering problem with known solutions, not a fundamental flaw:
+
+1. **Hybrid search**: Combine vector similarity with keyword filters and metadata. "Semantic search within services tagged 'auth' modified in the last 30 days" dramatically reduces noise.
+
+2. **Reranking**: Use a cross-encoder model as a second pass. First-pass retrieval gets 100 candidates in 40ms; reranking narrows to top 10 in another 100ms. Total latency: still faster than your MCP cold starts.
+
+3. **Iterative refinement**: Retrieval is not one-shot. Developers naturally iterate: search, scan results, refine query. This loop takes 5-10 seconds. Your MCP approach still requires iteration, but each iteration has network overhead.
+
+The real question isn't "is similarity perfect?" It's "is similarity + engineering > alternatives?" The data says yes: GitHub Copilot, Cursor, Sourcegraph — all bet on embeddings at scale because retrieval speed and semantic flexibility beat structural precision for *most* queries.
+
+I don't claim embeddings are truth. I claim they're the best approximation we can compute in under 50ms at repository scale. Prove me wrong with benchmarks, not philosophy.

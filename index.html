@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Context Wars: 7 Strategies for AI Coding Quality</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+  body { font-family: 'Inter', sans-serif; }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+  .persona-card { transition: all 0.3s ease; }
+  .persona-card:hover { transform: translateY(-2px); }
+  .tab-btn.active { border-bottom: 3px solid; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .accordion-content.open { max-height: 20000px; }
+  blockquote { border-left: 3px solid #6366f1; padding-left: 1rem; }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  html { scroll-behavior: smooth; }
+  .sticky-nav { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+</style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+<!-- Navigation -->
+<nav class="sticky-nav fixed top-0 w-full bg-stone-50/90 border-b border-stone-200 z-50">
+  <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <span class="font-bold text-sm tracking-tight">The Context Wars</span>
+    <div class="hidden md:flex gap-6 text-xs font-medium text-stone-500">
+      <a href="#problem" class="hover:text-stone-800">Problem</a>
+      <a href="#strategies" class="hover:text-stone-800">Strategies</a>
+      <a href="#matrix" class="hover:text-stone-800">Decision Matrix</a>
+      <a href="#debate" class="hover:text-stone-800">The Debate</a>
+      <a href="#verdicts" class="hover:text-stone-800">Final Verdicts</a>
+      <a href="#synthesis" class="hover:text-stone-800">Synthesis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="pt-24 pb-16 px-4">
+  <div class="max-w-3xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm mb-4 tracking-wide uppercase">Research Report &middot; February 2026</p>
+    <h1 class="text-4xl md:text-5xl font-black leading-tight tracking-tight mb-6">
+      The Context Wars:<br>
+      <span class="text-stone-500">7 Strategies for Preventing<br>AI Code Slop</span>
+    </h1>
+    <p class="text-lg text-stone-600 leading-relaxed max-w-2xl">
+      How do you maintain living, accurate context about a project's conventions so AI agents produce code that follows your team's standards&mdash;not generic, dogmatic slop? Seven personas debated this question. None of them won outright. All of them learned something.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-2">
+      <span class="px-3 py-1 bg-stone-200 rounded-full text-xs font-medium">Claude Code</span>
+      <span class="px-3 py-1 bg-stone-200 rounded-full text-xs font-medium">AI Coding</span>
+      <span class="px-3 py-1 bg-stone-200 rounded-full text-xs font-medium">Context Engineering</span>
+      <span class="px-3 py-1 bg-stone-200 rounded-full text-xs font-medium">TDD</span>
+      <span class="px-3 py-1 bg-stone-200 rounded-full text-xs font-medium">Hooks</span>
+    </div>
+  </div>
+</header>
+
+<!-- Problem Statement -->
+<section id="problem" class="py-12 px-4 border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6">The Problem</h2>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+      <p class="font-semibold text-red-800 mb-2">The AI Slop Symptom</p>
+      <p class="text-red-700 text-sm leading-relaxed">
+        You ask an AI agent to write tests for a Rails model. It generates 200 lines of tests that check whether the migration added a column, whether the file exists, and whether ActiveRecord's <code class="bg-red-100 px-1 rounded">find</code> method was called. These tests pass. They're worthless. This is AI slop&mdash;code that satisfies the letter of the request while violating every convention your team actually cares about.
+      </p>
+    </div>
+    <p class="text-stone-600 leading-relaxed mb-4">
+      The root cause isn't that AI models are stupid. It's that they lack <strong>project-specific context</strong> about your conventions, patterns, and anti-patterns. And when they do have context, there's no guarantee they'll follow it.
+    </p>
+    <p class="text-stone-600 leading-relaxed mb-4">
+      This report documents a structured debate between seven personas, each advocating a different strategy for solving this problem. The debate was designed not to crown a winner, but to stress-test each idea and reveal where each approach genuinely fits.
+    </p>
+    <div class="bg-stone-100 rounded-lg p-6 mt-8">
+      <p class="font-semibold text-stone-700 mb-3">Three questions drove the debate:</p>
+      <ol class="list-decimal list-inside text-stone-600 space-y-2 text-sm">
+        <li><strong>How do you give AI agents accurate, project-specific context?</strong></li>
+        <li><strong>How do you keep that context current as the codebase evolves?</strong></li>
+        <li><strong>How do you enforce quality when probabilistic models ignore guidance?</strong></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- The Seven Strategies -->
+<section id="strategies" class="py-12 px-4 bg-white border-t border-stone-200">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-2xl font-bold mb-2 text-center">The Seven Strategies</h2>
+    <p class="text-stone-500 text-center mb-10 text-sm">Each advocated by a distinct persona with genuine conviction</p>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Minimalist -->
+      <div class="persona-card border border-stone-200 rounded-lg p-5 bg-stone-50">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">M</span>
+          <h3 class="font-bold text-sm">The Minimalist</h3>
+        </div>
+        <p class="text-xs font-semibold text-emerald-700 mb-2 uppercase tracking-wide">Markdown Docs</p>
+        <p class="text-sm text-stone-600 leading-relaxed">Version-controlled <code>.llm-docs/</code> and <code>CLAUDE.md</code> files. Documentation you can see in a git diff. Staleness solved by PR review culture.</p>
+        <p class="text-xs text-stone-400 mt-3">Best for: 3-15 devs, 10k-200k LOC, strong review culture</p>
+      </div>
+
+      <!-- Search Engineer -->
+      <div class="persona-card border border-stone-200 rounded-lg p-5 bg-stone-50">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold">S</span>
+          <h3 class="font-bold text-sm">The Search Engineer</h3>
+        </div>
+        <p class="text-xs font-semibold text-blue-700 mb-2 uppercase tracking-wide">RAG + AST Indexing</p>
+        <p class="text-sm text-stone-600 leading-relaxed">The codebase IS the documentation. Vector embeddings with AST-aware chunking, Merkle tree change detection. Auto-updates via CI.</p>
+        <p class="text-xs text-stone-400 mt-3">Best for: Large codebases, rapid iteration, no time for docs</p>
+      </div>
+
+      <!-- Graph Theorist -->
+      <div class="persona-card border border-stone-200 rounded-lg p-5 bg-stone-50">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold">G</span>
+          <h3 class="font-bold text-sm">The Graph Theorist</h3>
+        </div>
+        <p class="text-xs font-semibold text-purple-700 mb-2 uppercase tracking-wide">Temporal Knowledge Graphs</p>
+        <p class="text-sm text-stone-600 leading-relaxed">Code is relationships evolving through time. Entities, typed edges, temporal versioning. Tracks what changed, when, and why.</p>
+        <p class="text-xs text-stone-400 mt-3">Best for: Long-lived projects, complex domains, audit trails</p>
+      </div>
+
+      <!-- Memory Architect -->
+      <div class="persona-card border border-stone-200 rounded-lg p-5 bg-stone-50">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold">A</span>
+          <h3 class="font-bold text-sm">The Memory Architect</h3>
+        </div>
+        <p class="text-xs font-semibold text-amber-700 mb-2 uppercase tracking-wide">Hybrid Memory Infrastructure</p>
+        <p class="text-sm text-stone-600 leading-relaxed">Three-layer hierarchy: raw resources, atomic facts, evolving summaries. Active consolidation and decay. Memory as OS infrastructure.</p>
+        <p class="text-xs text-stone-400 mt-3">Best for: 3+ year projects, high turnover, institutional knowledge</p>
+      </div>
+
+      <!-- Structural Analyst -->
+      <div class="persona-card border border-stone-200 rounded-lg p-5 bg-stone-50">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold">T</span>
+          <h3 class="font-bold text-sm">The Structural Analyst</h3>
+        </div>
+        <p class="text-xs font-semibold text-rose-700 mb-2 uppercase tracking-wide">AST / Tree-sitter</p>
+        <p class="text-sm text-stone-600 leading-relaxed">Code structure is the only ground truth. Parse it programmatically, don't describe it in prose. Zero staleness by definition.</p>
+        <p class="text-xs text-stone-400 mt-3">Best for: Strong conventions, large codebases, pattern enforcement</p>
+      </div>
+
+      <!-- Context Engineer -->
+      <div class="persona-card border border-stone-200 rounded-lg p-5 bg-stone-50">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-sm font-bold">C</span>
+          <h3 class="font-bold text-sm">The Context Engineer</h3>
+        </div>
+        <p class="text-xs font-semibold text-cyan-700 mb-2 uppercase tracking-wide">Dynamic Assembly via MCP</p>
+        <p class="text-sm text-stone-600 leading-relaxed">Storage is a red herring. What matters is assembling the right 5-10 pieces of context at inference time. MCP servers, skills, hooks.</p>
+        <p class="text-xs text-stone-400 mt-3">Best for: Agent-based tools, mature MCP ecosystem, custom tooling</p>
+      </div>
+
+      <!-- Quality Gatekeeper -->
+      <div class="persona-card border border-red-300 rounded-lg p-5 bg-red-50 md:col-span-2 lg:col-span-1">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-8 h-8 rounded-full bg-red-200 text-red-800 flex items-center justify-center text-sm font-bold">Q</span>
+          <h3 class="font-bold text-sm">The Quality Gatekeeper</h3>
+        </div>
+        <p class="text-xs font-semibold text-red-700 mb-2 uppercase tracking-wide">Deterministic Hook Enforcement</p>
+        <p class="text-sm text-stone-600 leading-relaxed">Stop trying to make AI smarter. Build walls that reject dumb output. PreToolUse/PostToolUse/Stop hooks that programmatically block code violating quality rules.</p>
+        <p class="text-xs text-stone-400 mt-3">Best for: ANY team using AI code generation. Universal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Decision Matrix -->
+<section id="matrix" class="py-12 px-4 border-t border-stone-200">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-2xl font-bold mb-2">Decision Matrix: When to Use What</h2>
+    <p class="text-stone-500 mb-8 text-sm">No single strategy fits all contexts. Use this to match your situation to the right approach.</p>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs border-collapse">
+        <thead>
+          <tr class="bg-stone-800 text-white">
+            <th class="px-3 py-3 text-left font-semibold rounded-tl-lg">Your Situation</th>
+            <th class="px-3 py-3 text-center font-semibold">Start Here</th>
+            <th class="px-3 py-3 text-center font-semibold">Add Next</th>
+            <th class="px-3 py-3 text-center font-semibold">Consider Later</th>
+            <th class="px-3 py-3 text-center font-semibold rounded-tr-lg">Skip</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone-200">
+          <tr class="bg-white">
+            <td class="px-3 py-3 font-medium">Solo dev, small project</td>
+            <td class="px-3 py-3 text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Minimalist</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Hooks</span></td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+            <td class="px-3 py-3 text-center text-stone-400">Graphs, Memory</td>
+          </tr>
+          <tr class="bg-stone-50">
+            <td class="px-3 py-3 font-medium">Small team (3-15), active codebase</td>
+            <td class="px-3 py-3 text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Minimalist</span> + <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Hooks</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">AST Analysis</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">RAG</span></td>
+            <td class="px-3 py-3 text-center text-stone-400">Graphs</td>
+          </tr>
+          <tr class="bg-white">
+            <td class="px-3 py-3 font-medium">Large codebase (500k+ LOC)</td>
+            <td class="px-3 py-3 text-center"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">AST</span> + <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">RAG</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-full">Context Eng.</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">Graphs</span></td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+          </tr>
+          <tr class="bg-stone-50">
+            <td class="px-3 py-3 font-medium">Long-lived project (3+ years)</td>
+            <td class="px-3 py-3 text-center"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">AST</span> + <span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Hooks</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Memory</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">Graphs</span></td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+          </tr>
+          <tr class="bg-white">
+            <td class="px-3 py-3 font-medium">Regulated industry (fintech, health)</td>
+            <td class="px-3 py-3 text-center"><span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Hooks</span> + <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">AST</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">Graphs</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Memory</span></td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+          </tr>
+          <tr class="bg-stone-50">
+            <td class="px-3 py-3 font-medium">High developer turnover</td>
+            <td class="px-3 py-3 text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Minimalist</span> + <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Memory</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-full">Context Eng.</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">Graphs</span></td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+          </tr>
+          <tr class="bg-white">
+            <td class="px-3 py-3 font-medium">Rapid prototyping / MVP</td>
+            <td class="px-3 py-3 text-center"><span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">Hooks</span> (minimal)</td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+            <td class="px-3 py-3 text-center text-stone-400">Everything else</td>
+          </tr>
+          <tr class="bg-stone-50">
+            <td class="px-3 py-3 font-medium">AI slop is your primary pain</td>
+            <td class="px-3 py-3 text-center"><span class="bg-red-100 text-red-800 px-2 py-0.5 rounded-full font-bold">Hooks</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">AST</span> + <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Minimalist</span></td>
+            <td class="px-3 py-3 text-center"><span class="bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-full">Context Eng.</span></td>
+            <td class="px-3 py-3 text-center text-stone-400">&mdash;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8 bg-indigo-50 border border-indigo-200 rounded-lg p-6">
+      <p class="font-bold text-indigo-900 mb-2">The Universal Recommendation</p>
+      <p class="text-indigo-800 text-sm leading-relaxed">
+        Every persona, after the debate, converged on this: <strong>start with structural analysis (AST/tree-sitter) as your foundation</strong>, add <strong>hooks for enforcement</strong>, and layer on informational strategies (docs, RAG, memory) only when you've experienced the same pain three times in the same spot. The pain is your signal.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- The Debate -->
+<section id="debate" class="py-12 px-4 bg-white border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-2">The Debate</h2>
+    <p class="text-stone-500 mb-8 text-sm">Click each persona to read their position paper, cross-examination, and key quotes. Full transcripts available in the <code>personas/</code> directory.</p>
+
+    <!-- Persona Accordions -->
+    <div class="space-y-3" id="debate-accordions">
+
+      <!-- MINIMALIST -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold shrink-0">M</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Minimalist</span>
+              <span class="text-stone-400 text-xs ml-2">Markdown Docs</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">Core Thesis</p>
+            <p>"The best documentation system is the one that survives contact with reality. Markdown files in version control, organized in .llm-docs directories alongside your code, with CLAUDE.md files for team conventions. Nothing more."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Anti-Slop Prescription</p>
+            <p>Prescriptive docs that explicitly name forbidden patterns: "DO NOT write tests that verify migration structure. DO NOT write tests that verify file existence. DO NOT write tests that simply echo the implementation."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Staleness Solution</p>
+            <p>"Technical systems fail silently. Social contracts fail loudly, in the PR review where they can be fixed." Treats documentation review as part of code review.</p>
+
+            <blockquote class="text-stone-500 italic my-4">"I've watched too many sophisticated systems fail to trust complexity anymore. In software, robust usually beats clever."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Key Concession (from cross-examination)</p>
+            <p>Conceded that the Structural Analyst wins on detecting pattern violations&mdash;markdown can't enforce rules. Also conceded the Context Engineer's "assembly over storage" insight: "They turned context from a noun (documentation) into a verb (retrieval). That's the insight I was missing."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Final Verdict</p>
+            <p>"Start with code-only. Add context ONLY when you experience pain three times in the same spot. That pain is your signal. Don't pre-emptively document."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH ENGINEER -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold shrink-0">S</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Search Engineer</span>
+              <span class="text-stone-400 text-xs ml-2">RAG + AST Indexing</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">Core Thesis</p>
+            <p>"Stop writing documentation. Start retrieving it. The codebase IS the documentation. RAG with AST-aware chunking surfaces the right code at the right time from the actual source of truth."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Anti-Slop Mechanism</p>
+            <p>"RAG grounds generation in retrieval. Instead of 'generate a test based on your training data beliefs,' it's 'here are five real tests from this codebase&mdash;write something consistent with these.' The model learns empirically, not ideologically."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Weakness</p>
+            <p>"Embeddings measure similarity, not truth. If your codebase has three broken implementations of date parsing, RAG will happily surface all three. It doesn't know which one works."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Data isn't wisdom. Retrieval isn't context. I'm a better engineer for admitting that."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Key Concession</p>
+            <p>Acknowledged that negative decisions can't be retrieved: "Why did we decide NOT to use GraphQL? That's not in the code. RAG cannot retrieve what was never written down."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Final Verdict</p>
+            <p>"Don't start with RAG. Start with structural indexing. Add retrieval ONLY when structural queries fail."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRAPH THEORIST -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold shrink-0">G</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Graph Theorist</span>
+              <span class="text-stone-400 text-xs ml-2">Temporal Knowledge Graphs</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">Core Thesis</p>
+            <p>"Code is relationships evolving through time. Only a temporal knowledge graph captures what changed, when, and why. Everything else is archaeology without carbon dating."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The WHY Problem</p>
+            <p>The Graph Theorist's strongest contribution: linking code to the reasons behind it. "When an AI asks 'How do users relate to posts?', the graph returns the current edge AND can explain 'this used to be a direct has_many, but was refactored because [reason].'"</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Weakness</p>
+            <p>"Temporal versioning creates refactor nightmares. When UserService becomes AccountService, the edge history becomes archaeological debris."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Elegance without adoption is vanity. I built cathedrals when the world needed tents."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Key Concession</p>
+            <p>Admitted the Memory Architect's decay model is more graceful: "My graph model is unforgiving. A broken edge is a broken edge. Their three-layer hierarchy with temporal decay is more humane for real teams."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Final Verdict</p>
+            <p>"Don't build a graph. Build search with lightweight temporal markers. Only add graph relationships for specific hot zones where 'why did this change?' keeps recurring."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMORY ARCHITECT -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold shrink-0">A</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Memory Architect</span>
+              <span class="text-stone-400 text-xs ml-2">Hybrid Memory Infrastructure</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">Core Thesis</p>
+            <p>"Memory is infrastructure, not a feature. You need a three-layer hierarchy: raw resources (immutable logs), atomic facts (extracted knowledge), and evolving summaries (category-level context). With active consolidation and decay."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Killer Question</p>
+            <p>The debate's most powerful moment: "Six months ago, we decided not to use GraphQL for the mobile API. Why?" Only a memory system can answer questions about decisions NOT taken.</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Weakness</p>
+            <p>Consolidation destroys nuance: "Merging three separate Redis incidents into 'Redis is flaky' obliterates the forensic detail you need when the fourth incident occurs."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Infrastructure nobody uses is just a monument to my own ego. The best memory system is the one developers actually consult at 2 AM during an outage."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Key Concession</p>
+            <p>The Structural Analyst wins on bootstrapping time&mdash;immediate value vs hours/days of graph population. "I designed for Google-scale memory problems when most teams are still figuring out product-market fit."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Final Verdict</p>
+            <p>"Start with dependency graphs and architectural maps. THEN, when you catch yourself asking 'why did we do it this way?', add a simple timestamped decision log. Let it accumulate organically."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- STRUCTURAL ANALYST -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold shrink-0">T</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Structural Analyst</span>
+              <span class="text-stone-400 text-xs ml-2">AST / Tree-sitter</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">Core Thesis</p>
+            <p>"Documentation is someone's opinion about what code should do. The AST is what code actually does. Parse it. Don't ask humans to describe it in prose. The AST doesn't have opinions. It doesn't forget to update itself. It IS the code."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Zero Staleness</p>
+            <p>The debate's most powerful single argument: "There is no staleness. The AST is always current because it IS the code. You parse the code as it exists right now. Zero drift by definition."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Anti-Slop Detection</p>
+            <p>"If a model spec checks that a column is named exactly 'created_at', it's testing implementation. If it checks that a method returns a timestamp, it's testing behavior. AST analysis can categorize tests by what they actually assert against."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Structure without intent is correct but incomplete. Intent without structure is rich but unverifiable. I'd rather give an AI precise structural facts and force it to infer intent than give it stale intent that contradicts current structure."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Key Concession</p>
+            <p>The Graph Theorist wins on the WHY problem: "They connect WHAT (my domain) to WHY (commit messages, PR descriptions) and WHEN (temporal evolution). They give structure a timeline and intent."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Final Verdict</p>
+            <p>"Start with structural analysis as your foundation. But immediately layer on lightweight context linking structural facts to commits and rationale. I remain convinced: start with correctness. But do not end there."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTEXT ENGINEER -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-sm font-bold shrink-0">C</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Context Engineer</span>
+              <span class="text-stone-400 text-xs ml-2">Dynamic Assembly via MCP</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">Core Thesis</p>
+            <p>"Storage is a red herring. The bottleneck is the 200K context window and the model's attention curve. What matters is assembling the RIGHT 5-10 pieces of context at inference time and putting them in the right order."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Anti-Slop Prevention</p>
+            <p>"Context engineering prevents slop at the source by controlling the model's field of view. If the model never sees a 'test that migration adds column' example, it won't generate one. If it only sees behavior-driven test examples from YOUR codebase, it generates behavior-driven tests."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Weakness</p>
+            <p>"Some knowledge genuinely isn't recoverable from current code state. Historical decisions, abandoned approaches, performance cliff discoveries&mdash;these evaporate unless deliberately captured."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Assembly still matters. But you can't assemble fog."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Key Concession</p>
+            <p>Respected the Structural Analyst most: "Their core insight&mdash;codebases enforce invariants; understanding those constraints is understanding the system&mdash;is falsifiable and verifiable. I was doing vibes-based assembly. They're doing constraint propagation with provable guarantees."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Final Verdict</p>
+            <p>"Don't start with context engineering. Build the primitives first&mdash;invariant checking, semantic search, decision logs. Context engineering is the orchestration layer you add AFTER you have reliable primitives to orchestrate."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUALITY GATEKEEPER -->
+      <div class="border border-red-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-red-50 hover:bg-red-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-red-200 text-red-800 flex items-center justify-center text-sm font-bold shrink-0">Q</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Quality Gatekeeper</span>
+              <span class="text-stone-400 text-xs ml-2">Deterministic Hook Enforcement</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">Core Thesis</p>
+            <p>"Stop trying to make AI smarter. Start building walls that reject dumb output. Every other strategy relies on the AI making the right probabilistic choice. Hooks make bad choices impossible."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Concrete Hook Examples</p>
+            <div class="bg-stone-100 rounded p-3 text-xs font-mono space-y-1">
+              <p class="text-red-600"># Banned assertion patterns</p>
+              <p>reject if test contains: <code>column_names</code>, <code>File.exist?</code>, <code>table_exists?</code></p>
+              <p class="text-red-600 mt-2"># Mock abuse detector</p>
+              <p>reject if test mocks: <code>receive(:find)</code>, <code>receive(:where)</code>, <code>receive(:save)</code></p>
+              <p class="text-red-600 mt-2"># Description pattern enforcer</p>
+              <p>require behavior verbs: "returns", "creates", "raises"</p>
+              <p>reject implementation verbs: "calls", "queries", "sets"</p>
+            </div>
+
+            <p class="font-semibold text-stone-800 pt-2">Why It's Different</p>
+            <p>"Documentation tells the AI what to do. Hooks ensure it actually does it. Think of it like type checking. You don't fix type errors by writing better documentation about types. You use a type checker that rejects invalid code."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Context is advice. Hooks are law."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Key Concession</p>
+            <p>"Enforcement without information is a wall of rejection with no path forward. The synthesis: hooks are the LAST line of defense, not the first line of guidance."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Final Verdict</p>
+            <p>"Start with a PreToolUse hook that simply LOGS what the AI is about to do. Don't block anything yet. After two weeks of logs, write ONE enforcement rule for your most frequent pain point. Then layer in information strategy."</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Final Verdicts Summary -->
+<section id="verdicts" class="py-12 px-4 border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-2">Where Every Persona Landed</h2>
+    <p class="text-stone-500 mb-8 text-sm">After the debate, each persona was asked: "Who do you respect most now?" The results were revealing.</p>
+
+    <div class="space-y-4">
+      <div class="flex items-start gap-4 p-4 bg-white border border-stone-200 rounded-lg">
+        <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">M</span>
+        <div>
+          <p class="font-bold text-sm">The Minimalist</p>
+          <p class="text-sm text-stone-600">Now respects: <strong class="text-cyan-700">Context Engineer</strong>. "They turned context from a noun into a verb."</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 p-4 bg-white border border-stone-200 rounded-lg">
+        <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">S</span>
+        <div>
+          <p class="font-bold text-sm">The Search Engineer</p>
+          <p class="text-sm text-stone-600">Now respects: <strong class="text-cyan-700">Context Engineer</strong>. "They reframed the problem correctly. The AI needs task-specific assembly, not relevant documents."</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 p-4 bg-white border border-stone-200 rounded-lg">
+        <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">G</span>
+        <div>
+          <p class="font-bold text-sm">The Graph Theorist</p>
+          <p class="text-sm text-stone-600">Now respects: <strong class="text-cyan-700">Context Engineer</strong>. "The only approach that acknowledges LLMs don't need our metadata&mdash;they need our restraint."</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 p-4 bg-white border border-stone-200 rounded-lg">
+        <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">A</span>
+        <div>
+          <p class="font-bold text-sm">The Memory Architect</p>
+          <p class="text-sm text-stone-600">Now respects: <strong class="text-cyan-700">Context Engineer</strong>. "Their approach forces consolidation in real-time, shaped by the current question, not my predetermined hierarchy."</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 p-4 bg-white border border-stone-200 rounded-lg">
+        <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">T</span>
+        <div>
+          <p class="font-bold text-sm">The Structural Analyst</p>
+          <p class="text-sm text-stone-600">Now respects: <strong class="text-purple-700">Graph Theorist</strong>. "They connect WHAT (my domain) to WHY and WHEN. The graph layer sits on top of my foundation."</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 p-4 bg-white border border-stone-200 rounded-lg">
+        <span class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">C</span>
+        <div>
+          <p class="font-bold text-sm">The Context Engineer</p>
+          <p class="text-sm text-stone-600">Now respects: <strong class="text-rose-700">Structural Analyst</strong>. "Their assertions are falsifiable and verifiable. I was doing vibes-based assembly. You can't assemble fog."</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 p-4 bg-white border border-red-200 rounded-lg">
+        <span class="w-8 h-8 rounded-full bg-red-200 text-red-800 flex items-center justify-center text-sm font-bold shrink-0 mt-0.5">Q</span>
+        <div>
+          <p class="font-bold text-sm">The Quality Gatekeeper</p>
+          <p class="text-sm text-stone-600">Best complement: <strong class="text-cyan-700">Context Engineer</strong>. "Hooks need to know WHAT to enforce. The Context Engineer provides the 'why' that makes my 'no' actionable."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-stone-800 text-white rounded-lg p-6">
+      <p class="font-bold mb-2">The Pattern</p>
+      <p class="text-stone-300 text-sm leading-relaxed">
+        The Context Engineer was named "most respected" by 4 of 6 other personas&mdash;but the Context Engineer themselves respected the Structural Analyst most. Meanwhile, the Structural Analyst pointed to the Graph Theorist. This reveals a natural <strong class="text-white">layered architecture</strong>:
+      </p>
+      <div class="mt-4 flex items-center justify-center gap-2 text-xs font-mono">
+        <span class="bg-rose-800 px-3 py-1.5 rounded">AST Foundation</span>
+        <span class="text-stone-500">&rarr;</span>
+        <span class="bg-purple-800 px-3 py-1.5 rounded">Graph (WHY)</span>
+        <span class="text-stone-500">&rarr;</span>
+        <span class="bg-cyan-800 px-3 py-1.5 rounded">Assembly</span>
+        <span class="text-stone-500">&rarr;</span>
+        <span class="bg-red-700 px-3 py-1.5 rounded">Enforcement</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Synthesis -->
+<section id="synthesis" class="py-12 px-4 bg-white border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6">Synthesis: What Actually Works</h2>
+
+    <div class="space-y-6 text-sm text-stone-600 leading-relaxed">
+      <p>
+        The debate revealed something none of the personas expected: <strong>they aren't competing strategies. They're layers of a single system.</strong> Each solves a different part of the problem, and no single approach is sufficient alone.
+      </p>
+
+      <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
+        <p class="font-bold text-indigo-900 mb-3">The Four-Stage Pipeline</p>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+            <div>
+              <p class="font-semibold text-indigo-900">INFORM</p>
+              <p class="text-indigo-700">Give the AI accurate context about your project. Markdown docs for simple conventions. RAG for large codebases. Memory for institutional knowledge. Choose based on your situation.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+            <div>
+              <p class="font-semibold text-indigo-900">GROUND</p>
+              <p class="text-indigo-700">Use structural analysis (AST/tree-sitter) to establish ground truth. This is the only layer with zero staleness. It tells you WHAT the code actually does, right now, provably.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+            <div>
+              <p class="font-semibold text-indigo-900">ASSEMBLE</p>
+              <p class="text-indigo-700">Use context engineering (MCP servers, skills) to dynamically compose the right context at inference time. Don't dump everything&mdash;curate the 5-10 pieces that matter for THIS specific task.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
+            <div>
+              <p class="font-semibold text-indigo-900">ENFORCE</p>
+              <p class="text-indigo-700">Use hooks to deterministically reject output that violates quality standards. This is the only layer that provides guarantees. Everything else is probabilistic guidance; hooks are law.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="font-bold text-stone-800 text-base pt-4">Key Insights from the Debate</h3>
+
+      <div class="space-y-4">
+        <div class="border-l-3 border-stone-300 pl-4">
+          <p class="font-semibold text-stone-800">Storage vs. Assembly</p>
+          <p>The most influential reframing: the problem isn't how to <em>store</em> project knowledge but how to <em>assemble</em> the right pieces at the right moment. Every storage strategy (docs, RAG, graphs, memory) is only as good as the assembly layer that presents it to the model.</p>
+        </div>
+
+        <div class="border-l-3 border-stone-300 pl-4">
+          <p class="font-semibold text-stone-800">The WHAT vs. WHY Axis</p>
+          <p>The clearest division in the debate: structural analysis tells you WHAT exists (and can't go stale), while graphs/memory/docs tell you WHY it exists (but can go stale). Both are necessary. Structure is the foundation; intent is the context that makes structure meaningful.</p>
+        </div>
+
+        <div class="border-l-3 border-stone-300 pl-4">
+          <p class="font-semibold text-stone-800">Information vs. Enforcement</p>
+          <p>The Quality Gatekeeper's late entry exposed a blind spot: all six informational strategies assume the AI will follow guidance. It won't always. Deterministic enforcement through hooks is the only guarantee, but enforcement without guidance creates frustration. You need both.</p>
+        </div>
+
+        <div class="border-l-3 border-stone-300 pl-4">
+          <p class="font-semibold text-stone-800">Start Simple, Add When It Hurts</p>
+          <p>Every persona, after being humbled by the debate, recommended starting simpler than their position paper suggested. The universal advice: add complexity only when you've experienced the same pain three times. Pain is the signal.</p>
+        </div>
+
+        <div class="border-l-3 border-stone-300 pl-4">
+          <p class="font-semibold text-stone-800">Negative Decisions Matter</p>
+          <p>The Memory Architect's most powerful question: "Why did we decide NOT to use GraphQL?" This knowledge isn't in code, isn't in ASTs, isn't in embeddings. It only exists if someone captured the decision. Simple timestamped decision logs in markdown may be the most underrated tool.</p>
+        </div>
+      </div>
+
+      <h3 class="font-bold text-stone-800 text-base pt-4">The Practical Starting Point</h3>
+
+      <div class="bg-stone-100 rounded-lg p-6">
+        <p class="font-semibold text-stone-800 mb-3">If you're starting today, do this:</p>
+        <ol class="list-decimal list-inside space-y-2 text-stone-700">
+          <li><strong>Add a PreToolUse hook</strong> that logs AI actions for 2 weeks. Observe the patterns.</li>
+          <li><strong>Write ONE enforcement hook</strong> for your most painful recurring slop pattern.</li>
+          <li><strong>Set up tree-sitter or LSP queries</strong> for structural ground truth about your codebase.</li>
+          <li><strong>Create a minimal CLAUDE.md</strong> with your top 5 conventions (under 50 lines).</li>
+          <li><strong>Keep a decision log</strong>&mdash;a simple markdown file where you note rejected approaches with dates and reasons.</li>
+          <li><strong>Add more only when pain recurs.</strong> Don't build infrastructure for hypothetical problems.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-12 px-4 border-t border-stone-200 bg-stone-100">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-stone-500 text-xs mb-2">
+      Generated through a structured multi-agent debate using Claude Code Teams &middot; February 2026
+    </p>
+    <p class="text-stone-400 text-xs">
+      Full position papers, cross-examinations, and final assessments available in the <code>personas/</code> directory.
+    </p>
+  </div>
+</footer>
+
+<script>
+function toggleAccordion(btn) {
+  const content = btn.nextElementSibling;
+  const arrow = btn.querySelector('.accordion-arrow');
+  const isOpen = content.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('open'));
+  document.querySelectorAll('.accordion-arrow').forEach(a => a.style.transform = '');
+
+  if (!isOpen) {
+    content.classList.add('open');
+    arrow.style.transform = 'rotate(180deg)';
+  }
+}
+</script>
+
+</body>
+</html>

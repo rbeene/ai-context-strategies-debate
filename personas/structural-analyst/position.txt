@@ -1,0 +1,79 @@
+THE STRUCTURAL ANALYST: PARSE THE TRUTH, DON'T DOCUMENT THE FANTASY
+
+Core Thesis: Documentation Is Opinion, AST Is Reality
+
+Natural language documentation is fundamentally a lossy compression of ground truth. It represents what someone thought the code did at a particular moment, filtered through their understanding, biases, and writing ability. Documentation lies—not through malice, but through entropy. The instant it's written, it begins diverging from reality.
+
+Code structure, by contrast, is the only source of truth. If you want to know what a codebase actually does, parse it. Don't ask humans to describe it in prose. Use tree-sitter to build concrete syntax trees, expose structural queries through MCP servers, and leverage language servers for type information and cross-references. The AST doesn't have opinions. It doesn't forget to update itself. It IS the code.
+
+How Structural Analysis Works
+
+Tree-sitter is a parser generator that produces concrete syntax trees for dozens of languages. Unlike documentation that describes code, tree-sitter transforms code into a queryable data structure. You can ask: "Show me every class that inherits from ApplicationController." "Find all before_action callbacks in controller files." "List every method that calls authorize! and what policy class it references." These aren't fuzzy text searches—they're structural queries with deterministic results.
+
+MCP servers expose these queries as tools. Instead of reading a 3,000-word architectural document about how "we use the policy pattern for authorization," you query the AST: show me all classes ending in Policy, their inheritance relationships, and which controller actions call them. You get a complete map of the actual authorization structure, not someone's summary of it.
+
+Language servers add semantic information—type inference, definition locations, reference graphs. Combined with tree-sitter's syntactic analysis, you have a complete structural model. You can trace the execution flow from a controller action through service objects, ActiveRecord callbacks, background jobs, and policy checks. All programmatically. All current.
+
+Concrete Examples: Rails Project Analysis
+
+Consider a typical Rails codebase. Tree-sitter can identify patterns that documentation might describe vaguely or miss entirely:
+
+Model Specs: Parse every spec file in spec/models/. Extract the describe blocks and shared_examples_for declarations. You discover that 47 of 52 model specs use shared_examples_for :auditable, but 5 don't. This is ground truth. The docs might say "all models are auditable," but the AST shows you the actual compliance rate. You can immediately identify which models violate the convention.
+
+Controller Patterns: Query all controller classes for before_action declarations. You find that 90% follow a consistent pattern: authenticate_user!, authorize_resource!, load_resource!. The other 10% have custom callback chains. The AST shows you exactly which controllers are outliers and how they differ. No one needs to maintain a "Controller Conventions" document that gets outdated.
+
+Service Object Implementation: Find all classes inheriting from BaseService. Check that each implements a public #call method. Verify that none define other public methods (service objects should have a single entry point). The AST enforces the pattern by making violations visible. If someone adds a #process method instead of #call, structural analysis catches it immediately.
+
+Policy Class Hierarchy: Build the complete inheritance tree of every class ending in Policy. Map which controller actions instantiate each policy. Identify policies that are defined but never used. This is architectural reality, not architectural aspiration.
+
+Test File Organization: Parse every spec file. Verify that describe blocks map 1:1 with public methods. Check that concern specs use shared examples. Identify tests that violate conventions—maybe one describes "the save method" instead of "#save", breaking the pattern. The AST makes implicit conventions explicit through detection.
+
+Combating AI Slop: Structure Reveals Quality
+
+AI-generated code often passes syntax checks but violates deeper structural patterns. Structural analysis detects this:
+
+Implementation vs. Behavior Testing: Parse test files and analyze their assertion patterns. If a model spec checks that a column is named exactly "created_at", it's testing implementation. If it checks that a method returns a timestamp, it's testing behavior. AST analysis can categorize tests by what they actually assert against—ActiveRecord internals vs. public APIs.
+
+Pattern Compliance: If your codebase follows a "one describe block per public method" convention, the AST shows violations immediately. AI-generated tests often dump multiple unrelated assertions into a single test block. Structural analysis identifies files that don't match the established pattern.
+
+Dependency Hygiene: Parse import/require statements across the codebase. If AI introduces a dependency that breaks module boundaries (a model directly requiring a controller concern), structural analysis flags it. The reference graph shows architectural violations that might pass code review if reviewers skim the diff.
+
+Zero Staleness: The AST Is Always Current
+
+The single greatest advantage of structural analysis is that staleness is impossible. You don't maintain an AST separately from code—you generate it FROM code. Every time you parse, you're analyzing the current state. There is no drift by definition.
+
+Documentation becomes stale the moment someone commits code without updating docs. RAG embeddings become stale when the vector store isn't rebuilt. Knowledge graphs become stale when edges aren't updated. The AST is rebuilt on demand from source files. It cannot be out of sync with reality because it is derived from reality in real time.
+
+This isn't just about avoiding staleness—it's about eliminating an entire category of context maintenance. You never have to check if structural information is current. It always is. Parse the code, query the tree, trust the results.
+
+Honest Limitations: Structure Without Meaning
+
+ASTs capture structure, not intent. This is a fundamental limitation.
+
+Tree-sitter can tell you that every controller calls authorize! before performing business logic. It cannot tell you why this pattern exists, what security model it implements, or what happens if you violate it. It shows you WHAT but not WHY.
+
+You can parse that ApplicationPolicy defines a default #update? method returning false. You cannot parse the architectural decision: "We default-deny all permissions and require explicit authorization rules." That's semantic information—business context, design rationale, threat model.
+
+Structural analysis identifies implicit conventions only if they manifest structurally. If your team prefers composition over inheritance, the AST shows you the class relationships, but it doesn't label one approach as "preferred." You can detect that most service objects use composition, but you can't detect the philosophical preference without comparing against some baseline.
+
+Tree-sitter gives you syntax, not semantics. You get the shape of the code, not the meaning behind architectural choices. You can build tools to infer patterns (if 95% of classes follow convention X, flag the 5% that don't), but inference isn't the same as understanding.
+
+Where Structural Analysis Excels
+
+This approach shines in specific contexts:
+
+Projects with Strong Structural Conventions: If your team enforces patterns through code (base classes, shared modules, consistent method naming), structural analysis makes those patterns queryable. The code itself becomes the specification.
+
+Large Codebases: Manual documentation can't keep up with a 500-file Rails app. Structural analysis scales linearly—parsing 500 files takes slightly longer than parsing 50, but the accuracy is identical.
+
+Teams That Enforce Patterns Through Code: If your CI runs Rubocop, ESLint, or custom linters, you're already thinking structurally. Extend that mindset to context management. Make conventions machine-readable.
+
+Languages with Rich Type Systems: TypeScript, Rust, Scala—languages where the type system encodes architectural decisions. The AST includes type information, making semantic analysis stronger.
+
+Conclusion: Trust the Parse Tree
+
+Documentation is someone's opinion about what code should do. The AST is what code actually does. When you need to answer "how does authentication work in this codebase," parse the code. Find every call to authenticate_user!, trace the method definition, map the execution path. Don't ask someone to write a document describing it.
+
+This doesn't mean documentation is worthless. It means documentation should explain WHY, not WHAT. Explain the threat model that drove authentication choices. Explain why you chose JWT over sessions. But don't document which controllers require authentication—the AST already knows, and it will never lie to you.
+
+Parse the truth. Query the structure. Build context from ground truth, not from someone's summary of ground truth written six months ago. The code is the source of truth. Treat it that way.
