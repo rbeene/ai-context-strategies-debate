@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Messy Codebase Playbook: AI Context That Actually Works</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+  body { font-family: 'Inter', sans-serif; }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+  html { scroll-behavior: smooth; }
+  .sticky-nav { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+</style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+<!-- Navigation -->
+<nav class="sticky-nav fixed top-0 w-full bg-stone-50/90 border-b border-stone-200 z-50">
+  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="index.html" class="text-stone-400 text-xs hover:text-stone-600">&larr; Back to The Context Wars</a>
+    <span class="font-bold text-sm tracking-tight">The Playbook</span>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="pt-24 pb-12 px-4">
+  <div class="max-w-3xl mx-auto">
+    <p class="text-red-600 font-semibold text-sm mb-4 tracking-wide uppercase">Practical Guide &middot; February 2026</p>
+    <h1 class="text-3xl md:text-4xl font-black leading-tight tracking-tight mb-6">
+      Your Codebase Is a Mess.<br>
+      <span class="text-stone-500">Here's How to Use AI Anyway.</span>
+    </h1>
+    <p class="text-base text-stone-600 leading-relaxed max-w-2xl">
+      The academic advice assumes you're either starting fresh or working in a clean codebase. You're not. You have inconsistent patterns, missing tests, tribal knowledge that left with the last two developers, and a deadline. This is the playbook for that situation.
+    </p>
+  </div>
+</header>
+
+<!-- The Reality -->
+<section class="py-10 px-4 border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-xl font-bold mb-6">Stop. Read This First.</h2>
+
+    <div class="space-y-4 text-sm text-stone-600 leading-relaxed">
+      <p>
+        Most AI coding advice is written for one of two audiences: people starting a new project, or people with a well-structured codebase and strong conventions. If that's you, go read <a href="index.html" class="text-indigo-600 underline">the debate report</a>.
+      </p>
+      <p>
+        This page is for everyone else. You have:
+      </p>
+      <ul class="list-disc list-inside space-y-1 text-stone-700 ml-2">
+        <li>Multiple patterns for the same thing (three different ways to handle auth)</li>
+        <li>Tests that don't actually test anything useful, or no tests at all</li>
+        <li>Documentation that's 60% wrong and you don't know which 60%</li>
+        <li>Developers who left and took the "why" with them</li>
+        <li>An AI assistant that makes the mess worse because it learns from the mess</li>
+      </ul>
+      <p class="font-semibold text-stone-800 pt-2">
+        The last point is the real problem. In a messy codebase, AI doesn't just fail to help&mdash;it actively amplifies the mess. It finds your three auth patterns, picks the worst one, and replicates it. It reads your bad tests and writes more like them. Garbage in, garbage out, at scale.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- RAG Is Dead -->
+<section id="rag" class="py-10 px-4 border-t border-stone-200 bg-white">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-xl font-bold mb-2">Is RAG Dead?</h2>
+    <p class="text-stone-500 text-sm mb-6">The short answer, the long answer, and what it means for you.</p>
+
+    <div class="space-y-4 text-sm text-stone-600 leading-relaxed">
+      <div class="bg-stone-800 text-white rounded-lg p-6">
+        <p class="font-bold text-base mb-3">The short answer: for your use case, probably yes.</p>
+        <p class="text-stone-300">If you're using Claude Code (or similar AI coding agents) against a single repository, traditional RAG&mdash;embedding your code into vectors and retrieving by similarity&mdash;is overhead you don't need. Claude Code already reads your files directly. It greps, globs, and navigates your codebase with filesystem tools. Adding a vector database on top of that is adding a slower, less accurate middleman.</p>
+      </div>
+
+      <p class="font-semibold text-stone-800 pt-2">Why the debate shifted</p>
+      <p>
+        The "RAG is dead" argument has three pillars, all of which matter for your messy codebase:
+      </p>
+
+      <div class="space-y-3 mt-2">
+        <div class="border-l-3 border-red-300 pl-4">
+          <p class="font-semibold text-stone-800">1. Context windows got huge.</p>
+          <p>Claude's context window handles entire modules. You don't need to chunk and embed your code when the model can just read the files. Cache-augmented generation (stuffing relevant files directly into context) <a href="https://ucstrategies.com/news/standard-rag-is-dead-why-ai-architecture-split-in-2026/" class="text-indigo-600 underline">benchmarks at 40x faster</a> than traditional retrieve-then-generate.</p>
+        </div>
+
+        <div class="border-l-3 border-red-300 pl-4">
+          <p class="font-semibold text-stone-800">2. File-first agents work better for code.</p>
+          <p>Claude Code doesn't use RAG. It uses <a href="https://milvus.io/blog/why-im-against-claude-codes-grep-only-retrieval-it-just-burns-too-many-tokens.md" class="text-indigo-600 underline">grep, glob, and direct file reads</a>. This means it sees your actual code, not a lossy vector approximation of your code. For a messy codebase, this matters: you need precision, not similarity.</p>
+        </div>
+
+        <div class="border-l-3 border-red-300 pl-4">
+          <p class="font-semibold text-stone-800">3. Similarity isn't truth.</p>
+          <p>In a messy codebase, embedding-based retrieval is actively dangerous. Your three broken auth patterns are all "similar" to a query about authentication. RAG retrieves all three. It can't tell you which one is current, which is deprecated, and which was a failed experiment. <strong>In a messy codebase, similar code is often the wrong code.</strong></p>
+        </div>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-5 mt-4">
+        <p class="font-semibold text-amber-900 mb-2">When RAG still makes sense</p>
+        <p class="text-amber-800 text-sm">RAG isn't dead everywhere. If you have a massive documentation corpus (hundreds of design docs, ADRs, runbooks) that won't fit in context, <a href="https://vstorm.co/rag/why-rag-is-not-dead-a-case-for-context-engineering-over-massive-context-windows/" class="text-indigo-600 underline">semantic search still provides value</a>. But for code-against-code work in a single repo? Skip it. Use direct file access through MCP servers or let your AI agent read files natively.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The Playbook -->
+<section id="playbook" class="py-10 px-4 border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-xl font-bold mb-2">The Playbook</h2>
+    <p class="text-stone-500 text-sm mb-8">Five phases. Each builds on the last. Start at Phase 1 regardless of where you think you are.</p>
+
+    <!-- Phase 1 -->
+    <div class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center text-sm font-bold shrink-0">1</span>
+        <div>
+          <h3 class="font-bold text-base">Stop the Bleeding</h3>
+          <p class="text-xs text-stone-500">Week 1 &middot; Time: 2 hours</p>
+        </div>
+      </div>
+
+      <div class="ml-13 space-y-3 text-sm text-stone-600 leading-relaxed">
+        <p>Before you teach the AI anything, prevent it from making things worse. The AI will learn from your messy codebase and replicate the mess. Your first job is to build walls.</p>
+
+        <div class="bg-stone-100 rounded-lg p-5">
+          <p class="font-semibold text-stone-800 mb-3">Do this now:</p>
+          <ol class="list-decimal list-inside space-y-3">
+            <li>
+              <strong>Add a PostToolUse logging hook.</strong> Log every file the AI creates or modifies. Don't block anything yet. Just watch.
+              <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto"><code># .claude/hooks/post-tool-use.sh
+# Log AI file operations for review
+if [ "$TOOL_NAME" = "write" ] || [ "$TOOL_NAME" = "edit" ]; then
+  echo "$(date +%Y-%m-%d_%H:%M) $TOOL_NAME $FILE_PATH" >> .claude/ai-activity.log
+fi</code></pre>
+            </li>
+            <li>
+              <strong>Add your first enforcement hook.</strong> Pick ONE pattern that the AI keeps getting wrong. Just one. Write a hook that rejects it.
+              <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto"><code># Example: Block tests that check column names
+# .claude/hooks/stop-slop-tests.sh
+if echo "$CONTENT" | grep -q "column_names\|table_exists?\|File.exist?"; then
+  echo "REJECT: Test checks implementation details, not behavior"
+  exit 1
+fi</code></pre>
+            </li>
+            <li>
+              <strong>Write a 10-line CLAUDE.md.</strong> Not documentation. Commands.
+              <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto"><code># CLAUDE.md
+- DO NOT write tests that check column names, file existence, or migration structure.
+- DO NOT mock ActiveRecord methods (find, where, save, create).
+- When writing tests, look at test/models/user_test.rb as the canonical example.
+- The authentication pattern in app/services/auth_service.rb is the CURRENT pattern. Ignore auth code in app/controllers/sessions_controller.rb (legacy, being replaced).
+- Run `bin/rails test` to verify changes. If tests fail, fix them before moving on.</code></pre>
+            </li>
+          </ol>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mt-2">
+          <p class="text-red-800 text-sm"><strong>The critical move here:</strong> That third bullet in CLAUDE.md&mdash;pointing to a canonical example and explicitly marking legacy code&mdash;is worth more than 50 pages of documentation. In a messy codebase, the AI needs to know what to imitate and what to ignore. Name specific files.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold shrink-0">2</span>
+        <div>
+          <h3 class="font-bold text-base">Map the Mess</h3>
+          <p class="text-xs text-stone-500">Week 2-3 &middot; Time: 4 hours</p>
+        </div>
+      </div>
+
+      <div class="ml-13 space-y-3 text-sm text-stone-600 leading-relaxed">
+        <p>Now that the AI isn't making things worse, figure out what you actually have. You don't need to document everything. You need to identify the <strong>decision points</strong>&mdash;the places where the mess has multiple paths and someone needs to know which one is current.</p>
+
+        <div class="bg-stone-100 rounded-lg p-5">
+          <p class="font-semibold text-stone-800 mb-3">Do this:</p>
+          <ol class="list-decimal list-inside space-y-3">
+            <li>
+              <strong>Use tree-sitter (or an MCP server wrapping it) to get a structural map.</strong> You want: which modules exist, what imports what, where the public interfaces are. In a messy codebase, this reveals the actual dependency structure&mdash;not what people think it is, but what it actually is.
+            </li>
+            <li>
+              <strong>Identify the "canonical vs. legacy" boundaries.</strong> For every major pattern in your codebase (auth, data access, error handling, test structure), pick ONE file that represents the current way. Add these to CLAUDE.md as explicit pointers:
+              <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto"><code># CLAUDE.md additions
+## Canonical Examples (USE THESE as patterns)
+- Authentication: app/services/auth_service.rb
+- API endpoints: app/controllers/api/v2/users_controller.rb (NOT v1)
+- Model tests: test/models/order_test.rb
+- Service objects: app/services/payment_processor.rb
+
+## Legacy Code (DO NOT imitate these patterns)
+- app/controllers/sessions_controller.rb (being replaced by auth_service)
+- app/models/concerns/authenticatable.rb (deprecated)
+- test/integration/ (old style, migrate to test/system/)</code></pre>
+            </li>
+            <li>
+              <strong>Start a decision log.</strong> One file. Every time you or the AI makes a choice between competing patterns, write it down.
+              <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto"><code># decisions.md
+## 2026-02-07: Auth pattern
+We're using AuthService (app/services/auth_service.rb) not the
+Authenticatable concern. Reason: the concern mixes session and
+token auth. AuthService separates them. See PR #142.
+
+## 2026-02-08: Test style
+Using Minitest with behavioral descriptions, not column-level
+assertions. See test/models/order_test.rb as template.</code></pre>
+            </li>
+          </ol>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-2">
+          <p class="text-amber-800 text-sm"><strong>Why this matters in a messy codebase:</strong> The AI can read your entire codebase. The problem isn't access&mdash;it's signal-to-noise. When three patterns exist for the same thing, the AI needs a human to say "this one." That's what CLAUDE.md does. Not documentation. Disambiguation.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold shrink-0">3</span>
+        <div>
+          <h3 class="font-bold text-base">Fence the Zones</h3>
+          <p class="text-xs text-stone-500">Week 3-4 &middot; Time: ongoing</p>
+        </div>
+      </div>
+
+      <div class="ml-13 space-y-3 text-sm text-stone-600 leading-relaxed">
+        <p>By now you've been logging AI activity for two weeks. Review the logs. You'll see patterns: the AI keeps touching the same legacy files, keeps generating the same anti-patterns, keeps making the same mistakes.</p>
+
+        <div class="bg-stone-100 rounded-lg p-5">
+          <p class="font-semibold text-stone-800 mb-3">Build targeted enforcement:</p>
+          <ol class="list-decimal list-inside space-y-3">
+            <li>
+              <strong>Add hooks for each recurring failure.</strong> Not hypothetical failures. Actual ones from your logs. Each hook should be born from a real incident.
+              <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto"><code># Hook rules grow from actual failures:
+# Week 2: AI kept mocking ActiveRecord - add mock detector
+# Week 3: AI used deprecated API client - add import blocker
+# Week 3: AI put logic in controllers - add controller complexity check</code></pre>
+            </li>
+            <li>
+              <strong>Create "no-fly zones."</strong> Mark directories or files that the AI should never modify without explicit instruction. In a messy codebase, there are always files that look simple but have hidden dependencies.
+              <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto"><code># CLAUDE.md additions
+## No-Fly Zones (DO NOT modify without explicit request)
+- config/initializers/monkey_patches.rb (load-order dependent)
+- app/models/user.rb (200+ implicit dependents, modify with extreme care)
+- db/seeds.rb (production data recovery depends on this)</code></pre>
+            </li>
+            <li>
+              <strong>Use MCP servers to give the AI scoped access.</strong> Instead of letting it roam the entire codebase, point it at specific directories for specific tasks. A tree-sitter MCP server that only exposes the module you're working on is safer than full codebase access.
+            </li>
+          </ol>
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mt-2">
+          <p class="text-emerald-800 text-sm"><strong>The principle:</strong> In a clean codebase, you give the AI freedom and trust the patterns. In a messy codebase, you restrict freedom and enforce boundaries. Hooks are how you restrict without blocking productivity.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold shrink-0">4</span>
+        <div>
+          <h3 class="font-bold text-base">Clean As You Go</h3>
+          <p class="text-xs text-stone-500">Month 2+ &middot; Ongoing</p>
+        </div>
+      </div>
+
+      <div class="ml-13 space-y-3 text-sm text-stone-600 leading-relaxed">
+        <p>Now use the AI to incrementally clean the mess. Not a big-bang refactor. Small, targeted cleanups tied to feature work.</p>
+
+        <div class="bg-stone-100 rounded-lg p-5">
+          <p class="font-semibold text-stone-800 mb-3">The workflow:</p>
+          <ol class="list-decimal list-inside space-y-3">
+            <li>
+              <strong>Every feature task, add one cleanup task.</strong> Working on the orders module? While you're there, migrate one legacy pattern to the canonical one. Update CLAUDE.md to mark the migration. The AI learns from the migration for next time.
+            </li>
+            <li>
+              <strong>Update the decision log with each cleanup.</strong> "Migrated OrdersController from v1 auth pattern to AuthService. Old code removed. See PR #167." This is institutional memory that survives developer turnover.
+            </li>
+            <li>
+              <strong>Retire hooks as the codebase improves.</strong> That hook blocking legacy auth patterns? Once all legacy auth code is migrated, the hook becomes unnecessary. Remove it. Hooks should reflect current risks, not historical ones.
+            </li>
+            <li>
+              <strong>Let the canonical list grow.</strong> Each cleanup establishes a new canonical example. The CLAUDE.md "canonical examples" section becomes your actual style guide&mdash;not prose about what to do, but pointers to real code that does it.
+            </li>
+          </ol>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-2">
+          <p class="text-blue-800 text-sm"><strong>Why this works in a messy codebase:</strong> You're not trying to document the whole codebase. You're establishing beachheads of quality and expanding them. Each cleaned zone makes the AI better at the next task in that zone because it now has a correct example to learn from.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="mb-10">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">5</span>
+        <div>
+          <h3 class="font-bold text-base">Scale What Worked</h3>
+          <p class="text-xs text-stone-500">Month 6+ &middot; When the pain justifies it</p>
+        </div>
+      </div>
+
+      <div class="ml-13 space-y-3 text-sm text-stone-600 leading-relaxed">
+        <p>By now you have: a CLAUDE.md that disambiguates your codebase, hooks that enforce quality, a decision log that captures rationale, and canonical examples for each pattern. The mess is shrinking. Now you can layer on sophistication&mdash;but only where it earns its keep.</p>
+
+        <div class="bg-stone-100 rounded-lg p-5">
+          <p class="font-semibold text-stone-800 mb-3">Add these only when specific pain drives you to them:</p>
+          <ul class="list-disc list-inside space-y-3">
+            <li>
+              <strong>MCP servers for structural queries</strong> when you need cross-module impact analysis. "What depends on this service?" becomes a real question when your codebase is large enough.
+            </li>
+            <li>
+              <strong>Skills files for repeated workflows.</strong> If you find yourself giving the AI the same 10-line instruction for every test file, make it a skill. Reusable prompt fragments, not documentation.
+            </li>
+            <li>
+              <strong>Subagents for scoped tasks.</strong> Instead of one agent with full codebase access, spin up focused agents: one for tests, one for implementation, one for review. Each gets a different CLAUDE.md slice and different hooks.
+            </li>
+            <li>
+              <strong>Semantic search over your decision log</strong> only when it gets large enough (50+ entries) that grep doesn't cut it. This is where RAG-style retrieval actually helps&mdash;over your decisions and docs, not over code.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- The Anti-Patterns -->
+<section id="anti-patterns" class="py-10 px-4 border-t border-stone-200 bg-white">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-xl font-bold mb-6">What Not To Do</h2>
+
+    <div class="space-y-4">
+      <div class="flex items-start gap-3 p-4 border border-red-200 rounded-lg bg-red-50">
+        <span class="text-red-600 font-bold text-lg shrink-0 mt-0.5">&times;</span>
+        <div>
+          <p class="font-semibold text-sm text-red-900">Don't write comprehensive documentation first.</p>
+          <p class="text-sm text-red-800">In a messy codebase, any documentation you write today will be wrong about parts you haven't discovered yet. Document as you discover, not upfront.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3 p-4 border border-red-200 rounded-lg bg-red-50">
+        <span class="text-red-600 font-bold text-lg shrink-0 mt-0.5">&times;</span>
+        <div>
+          <p class="font-semibold text-sm text-red-900">Don't embed your messy code into vectors.</p>
+          <p class="text-sm text-red-800">RAG over a messy codebase retrieves messy examples. You're training the AI on your worst code. Use direct file access and point it at specific files instead.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3 p-4 border border-red-200 rounded-lg bg-red-50">
+        <span class="text-red-600 font-bold text-lg shrink-0 mt-0.5">&times;</span>
+        <div>
+          <p class="font-semibold text-sm text-red-900">Don't try to build a knowledge graph of your existing codebase.</p>
+          <p class="text-sm text-red-800">A graph of a mess is just a more expensive mess. Fix the patterns first, then graph what's worth preserving.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3 p-4 border border-red-200 rounded-lg bg-red-50">
+        <span class="text-red-600 font-bold text-lg shrink-0 mt-0.5">&times;</span>
+        <div>
+          <p class="font-semibold text-sm text-red-900">Don't give the AI full codebase freedom.</p>
+          <p class="text-sm text-red-800">In a messy codebase, the AI will find and imitate the worst code. Scope its access. Point it at canonical examples. Use hooks to block known bad patterns.</p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3 p-4 border border-red-200 rounded-lg bg-red-50">
+        <span class="text-red-600 font-bold text-lg shrink-0 mt-0.5">&times;</span>
+        <div>
+          <p class="font-semibold text-sm text-red-900">Don't big-bang refactor with AI.</p>
+          <p class="text-sm text-red-800">AI lacks the context to understand ripple effects across a legacy system. Clean incrementally. One module per feature. Verify after each change.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Reference -->
+<section id="reference" class="py-10 px-4 border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-xl font-bold mb-6">Quick Reference: What Goes Where</h2>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs border-collapse">
+        <thead>
+          <tr class="bg-stone-800 text-white">
+            <th class="px-4 py-3 text-left font-semibold rounded-tl-lg">Tool</th>
+            <th class="px-4 py-3 text-left font-semibold">What It Does</th>
+            <th class="px-4 py-3 text-left font-semibold">Messy Codebase Use</th>
+            <th class="px-4 py-3 text-left font-semibold rounded-tr-lg">When to Add</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone-200">
+          <tr class="bg-white">
+            <td class="px-4 py-3 font-semibold text-stone-800">CLAUDE.md</td>
+            <td class="px-4 py-3">Project conventions and rules</td>
+            <td class="px-4 py-3"><strong>Disambiguation.</strong> "Use THIS pattern, not THAT one." Point to specific files.</td>
+            <td class="px-4 py-3">Day 1</td>
+          </tr>
+          <tr class="bg-stone-50">
+            <td class="px-4 py-3 font-semibold text-stone-800">Hooks</td>
+            <td class="px-4 py-3">Block AI output that violates rules</td>
+            <td class="px-4 py-3"><strong>Prevent regression.</strong> One hook per real failure. Grows from signal.</td>
+            <td class="px-4 py-3">Day 1 (logging), Week 2+ (enforcement)</td>
+          </tr>
+          <tr class="bg-white">
+            <td class="px-4 py-3 font-semibold text-stone-800">decisions.md</td>
+            <td class="px-4 py-3">Records rationale for choices</td>
+            <td class="px-4 py-3"><strong>Institutional memory.</strong> Why you chose pattern A over B. Survives turnover.</td>
+            <td class="px-4 py-3">Week 2</td>
+          </tr>
+          <tr class="bg-stone-50">
+            <td class="px-4 py-3 font-semibold text-stone-800">Tree-sitter / AST</td>
+            <td class="px-4 py-3">Structural code analysis</td>
+            <td class="px-4 py-3"><strong>Dependency mapping.</strong> What actually imports what. Ground truth, no opinions.</td>
+            <td class="px-4 py-3">Week 2-3</td>
+          </tr>
+          <tr class="bg-white">
+            <td class="px-4 py-3 font-semibold text-stone-800">MCP Servers</td>
+            <td class="px-4 py-3">Pluggable context sources</td>
+            <td class="px-4 py-3"><strong>Scoped access.</strong> Give the AI structured views of specific modules, not everything.</td>
+            <td class="px-4 py-3">Month 2+</td>
+          </tr>
+          <tr class="bg-stone-50">
+            <td class="px-4 py-3 font-semibold text-stone-800">Skills</td>
+            <td class="px-4 py-3">Reusable prompt templates</td>
+            <td class="px-4 py-3"><strong>Workflow standardization.</strong> Same instructions every time for common tasks.</td>
+            <td class="px-4 py-3">Month 2+</td>
+          </tr>
+          <tr class="bg-white">
+            <td class="px-4 py-3 font-semibold text-stone-800">RAG / Embeddings</td>
+            <td class="px-4 py-3">Semantic search over docs</td>
+            <td class="px-4 py-3"><strong>Decision log search</strong> only. Not over code. Over your accumulated human decisions.</td>
+            <td class="px-4 py-3">Month 6+ (if ever)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- The Bottom Line -->
+<section class="py-10 px-4 border-t border-stone-200 bg-white">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-xl font-bold mb-6">The Bottom Line</h2>
+
+    <div class="space-y-4 text-sm text-stone-600 leading-relaxed">
+      <p>
+        In a messy codebase, the AI context problem isn't "how do I give the AI enough information?" It's <strong>"how do I prevent the AI from drowning in bad information?"</strong>
+      </p>
+      <p>The strategy is three moves:</p>
+
+      <div class="grid md:grid-cols-3 gap-4 mt-4">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <p class="font-bold text-red-800 text-2xl mb-1">Fence</p>
+          <p class="text-red-700 text-xs">Hooks block bad output.<br>No-fly zones protect fragile code.<br>Enforcement grows from failure.</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+          <p class="font-bold text-amber-800 text-2xl mb-1">Point</p>
+          <p class="text-amber-700 text-xs">CLAUDE.md points to canonical code.<br>Explicit "use this, not that."<br>Disambiguation over documentation.</p>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
+          <p class="font-bold text-emerald-800 text-2xl mb-1">Expand</p>
+          <p class="text-emerald-700 text-xs">Clean one zone per feature.<br>Each cleanup teaches the AI.<br>Quality beachheads grow outward.</p>
+        </div>
+      </div>
+
+      <p class="pt-4">
+        Every tool in the <a href="index.html" class="text-indigo-600 underline">Context Wars debate</a> has a role. But in a messy codebase, the order matters more than the tools. Fence first. Point second. Expand third. Skip nothing.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="py-10 px-4 border-t border-stone-200 bg-stone-100">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-stone-500 text-xs mb-2">
+      Part of <a href="index.html" class="underline">The Context Wars</a> &middot; February 2026
+    </p>
+    <p class="text-stone-400 text-xs">
+      Sources: <a href="https://ucstrategies.com/news/standard-rag-is-dead-why-ai-architecture-split-in-2026/" class="underline">UCStrategies</a> &middot;
+      <a href="https://vstorm.co/rag/why-rag-is-not-dead-a-case-for-context-engineering-over-massive-context-windows/" class="underline">Vstorm</a> &middot;
+      <a href="https://addyosmani.com/blog/ai-coding-workflow/" class="underline">Addy Osmani</a> &middot;
+      <a href="https://www.builder.io/blog/claude-code" class="underline">Builder.io</a> &middot;
+      <a href="https://milvus.io/blog/why-im-against-claude-codes-grep-only-retrieval-it-just-burns-too-many-tokens.md" class="underline">Milvus</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
