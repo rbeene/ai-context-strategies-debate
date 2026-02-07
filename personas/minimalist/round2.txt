@@ -1,0 +1,73 @@
+THE MINIMALIST - ROUND 2: MARKDOWN AS KERNEL, NOT ENDPOINT
+
+ACKNOWLEDGING THE SWITCHING COST CRITIQUE
+
+The Round 1 conclusion was naive. "Start simple" masked a brutal truth: every transition is a rewrite. You start with markdown, hit limits at 10 files, migrate to structured docs, hit limits at 50 files, migrate to RAG, hit limits with stale embeddings, migrate to graph databases. Each migration is a tax on everything you've built — not just the tooling, but the team's mental models, the CI/CD pipelines, the accumulated knowledge about what works.
+
+I accept this. Pure markdown without structure IS a dead end. A flat directory of .md files doesn't scale past a dozen contributors. But here's what I got wrong in Round 1: I defended markdown as the solution. Markdown isn't the solution. Markdown is the SUBSTRATE.
+
+MARKDOWN AS THE GROWABLE KERNEL
+
+Here's the architecture that grows with you:
+
+**Day One (Solo Dev):** Write markdown docs with strict frontmatter. Every file starts with structured metadata — file paths, last-modified dates, dependency tags, component boundaries. A human reads these as docs. A machine can already parse them as structured data. You're not building for scale yet, but you're not painting yourself into a corner either.
+
+```markdown
+---
+component: auth
+depends_on: [database, session-manager]
+surfaces: [POST /login, GET /verify]
+last_updated: 2026-02-07
+---
+# Authentication System
+[...actual documentation...]
+```
+
+**Month Six (3-5 Devs):** Add a simple indexer that walks the .llm-docs directory, parses frontmatter, and builds a dependency graph in memory. Your CI checks for broken dependency links. Your context assembly tool pulls docs by component tag. The docs haven't changed. You've just added a read layer.
+
+**Year Two (10-20 Devs):** Feed the same markdown into a vector database for semantic search. The frontmatter becomes metadata filters for RAG queries. Your memory system extracts historical decisions from dated entries. The docs are still authoritative. RAG is just a view layer.
+
+**Year Five (50+ Devs):** The markdown corpus feeds a knowledge graph where nodes are components, edges are dependencies, and temporal metadata tracks evolution. Tree-sitter parses code structure, but markdown provides the "why" layer that AST can't capture. MCP servers dynamically assemble context by querying the graph, filtering by recency, and injecting relevant docs.
+
+**The key:** At every stage, the markdown is the source of truth. You add READ layers — indexers, parsers, query engines — but you never rewrite the corpus. A doc written on day one is still valid on year five. The human-readable format ensures knowledge doesn't get trapped in proprietary schemas.
+
+THE ARCHITECTURAL PRINCIPLE
+
+What makes markdown the kernel isn't its simplicity. It's its STABILITY. Markdown is a 20-year-old spec that hasn't changed. Frontmatter is a 15-year-old convention that's battle-tested across static site generators. Every programming language has markdown parsers. You're not betting on a tool; you're betting on a format that will outlive your codebase.
+
+Contrast this with the alternatives:
+
+- **Graph Theorist:** Your temporal knowledge graph is the MOST sophisticated read layer, but what's the write layer? If devs hand-author graph nodes, you've introduced catastrophic friction. If you auto-extract from code, you've made code the source of truth and lost the "why." You need markdown (or something) as input. The graph is a derived view.
+
+- **Memory Architect:** Your three-layer memory with decay is brilliant for runtime context assembly, but WHERE DOES THE MEMORY COME FROM? If it's scraped from Git history, you're dependent on commit message quality. If it's from meeting notes, you need structured ingestion. Markdown with temporal metadata is the natural source.
+
+- **RAG Engineer:** Your vector embeddings are only as fresh as your last indexing run. When the codebase changes, embeddings drift. The markdown corpus is the ground truth you re-embed. Without it, you're building on sand.
+
+CHALLENGING THE WORST SWITCHING COSTS
+
+The **Quality Gatekeeper's** deterministic hooks are a trap. Every rule you encode in pre-commit checks is a micro-decision that ossifies. Two years in, you have 50 lint rules that made sense in 2024 but now block necessary changes in 2026. You can't "migrate" away from deterministic hooks without a painful detox period. This is the WORST switching cost because it's invisible until you're locked in.
+
+The **Structural Analyst's** AST/tree-sitter approach has a subtler problem: it's code-centric. When you need to capture design decisions, tradeoffs, or deprecated patterns, AST gives you nothing. You end up bolting on a secondary system (probably markdown docs) and now you have two sources of truth. The switching cost is the schism between "what the code says" and "what we meant."
+
+IF MARKDOWN ISN'T THE KERNEL, WHAT IS?
+
+If I'm wrong — if markdown truly can't scale — then the kernel needs these properties:
+
+1. **Human-writable:** Devs must be able to author it without tooling. No GUIs, no DSLs.
+2. **Machine-parseable:** Structured enough for automated indexing, diffing, and querying.
+3. **Format-stable:** The spec must be old and boring. No bleeding-edge standards.
+4. **Tooling-agnostic:** Any language can read/write it. No lock-in to a platform.
+
+The only alternatives that fit: **YAML with schemas** (but worse readability), **JSON-LD** (but worse writability), or **structured plaintext with conventions** (which is just markdown with extra steps).
+
+THE HONEST ANSWER
+
+Markdown isn't magical. It's just the least-bad substrate for knowledge that needs to be both human-legible and machine-queryable. The day-one architecture is this:
+
+- **Write layer:** Markdown with strict frontmatter conventions.
+- **Read layers:** Additive tooling (indexers, embedders, assemblers) that treat markdown as immutable input.
+- **Escape hatch:** If you outgrow markdown, the structured frontmatter gives you migration paths to databases, graphs, or whatever comes next.
+
+You're not locked in. You're building on a stable foundation. And if the foundation cracks, you have structured data to migrate, not unstructured prose to hand-parse.
+
+Start with markdown. Not because it's simple. Because it's the kernel that every other layer can grow from.

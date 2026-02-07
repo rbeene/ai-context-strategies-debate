@@ -1,0 +1,70 @@
+ROUND 2: THE CONTEXT ENGINEER
+
+"You can't assemble fog." I said that in Round 1, and I meant it. Assembly without substance is worthless. But here's what I should have said: YOU CAN'T GROW WITHOUT A PROTOCOL.
+
+Every other persona is offering you a substrate. AST gives you syntax trees. RAG gives you embeddings. Graphs give you relationships. Memory gives you layers. All powerful. All necessary eventually. But none of them — NONE — offer you a path from day one to day 365 without replacement, without migration, without switching costs.
+
+MCP does.
+
+## The Growth Architecture
+
+The Model Context Protocol isn't a layer on top. It's not assembly logic waiting for substrate. It's the PROTOCOL that makes incremental growth possible. And protocols matter because they define interfaces, not implementations. When you start with MCP, you're not choosing what to index or how to search or which relationships to track. You're choosing the INTERFACE through which all future context sources will plug in.
+
+Day 1: One MCP server wrapping tree-sitter. Five project conventions in a skill file. One pre-commit hook logging AI actions to a file. Total setup time: 2 hours. Total context sources: 1. Total switching cost later: 0.
+
+Day 30: Add a second MCP server for git history (git log, git blame, recent changes). Extend the skill file with testing patterns you've discovered. Upgrade the hook to block one recurring anti-pattern. Setup time: 30 minutes. New context sources: 2. Switching cost: 0. The first server still works. The protocol didn't change.
+
+Day 90: Pain point emerges — you need semantic search across documentation. Add RAG as an MCP server. Embeddings are now a PLUGIN, not the foundation. The assembly pipeline queries three servers now instead of two. Skills are richer. Hooks extract memories from PostToolUse events. Setup time: 1 hour. Total sources: 3. Switching cost: 0. Nothing was replaced.
+
+Day 365: Full context assembly pipeline. MCP servers for: AST queries, git history, RAG over docs, GitHub issues, Slack discussions, production logs. Skills capture team workflows, testing strategies, deployment patterns. Hooks enforce code standards, extract learnings, block known bugs. You have a knowledge graph now too — AS ANOTHER MCP SERVER. Total sources: 8+. Total switching cost from day one: still 0.
+
+This is the only architecture where growth is truly additive. The protocol is the constant. The plugins multiply.
+
+## The Universal Interface
+
+Why does this matter? Because every substrate eventually needs an orchestration layer.
+
+AST gives you perfect syntax understanding — but how do you PRESENT that to the AI? You need assembly logic. You need to decide which nodes matter for this query, how deep to traverse, what context to include. That's context engineering.
+
+RAG gives you semantic search — but how do you COMBINE embeddings with AST precision, git history, and current conventions? You need assembly logic. You need to weight sources, merge results, present coherent context. That's context engineering.
+
+Graphs give you rich relationships — but how do you QUERY the graph, serialize results, and format them into AI context? You need assembly logic. You need graph-to-prompt translation. That's context engineering.
+
+All roads lead here. The question is: do you build your substrate FIRST and bolt on orchestration later (switching cost: high), or do you build the orchestration protocol first and plug in substrates incrementally (switching cost: zero)?
+
+## Progressive Context Enrichment
+
+The pattern is simple: start with the thinnest possible pipeline, then enrich.
+
+Week 1: One context source (tree-sitter MCP). One skill (project conventions). One hook (action logging). The AI gets structural code context and your five rules. That's already better than raw Claude.
+
+Month 1: Add git MCP. Now the AI sees recent changes, blame info, commit history. Two sources, one protocol. No migration.
+
+Month 3: Add RAG MCP for docs. Three sources. Skills have grown to include testing patterns. Hooks now enforce one critical standard.
+
+Year 1: Eight sources. Rich skills. Composable hooks. Knowledge graph as another server. The PIPELINE stayed the same. The protocol never changed. You just kept plugging things in.
+
+This is what "grows with you" means. Not "start simple and replace later." Not "choose your substrate and commit." But "build the interface first, add capability forever."
+
+## The Honest Challenge
+
+Can a solo dev actually do this on day one?
+
+Yes — IF we're honest about "minimum viable MCP." You need:
+- One MCP server (tree-sitter or git, pick your poison)
+- One skill file (literally a markdown document)
+- One hook script (10 lines of bash)
+
+Total tooling investment: one afternoon. Compare to "minimum viable RAG" (embedding model, vector DB, chunking strategy, reindexing pipeline) or "minimum viable knowledge graph" (schema design, extraction logic, graph database, query language). MCP's floor is LOWER because you can start with one simple server.
+
+The ceiling is the same height as everyone else's. But the ramp is gentler.
+
+## Conclusion
+
+Context engineering isn't "assembly waiting for substance." It's the protocol that makes substance composable. It's the framework that turns switching costs into plugin additions. It's the only architecture where day one and day 365 use THE SAME INTERFACE.
+
+You will need AST eventually. You will need RAG eventually. You will need graphs, memory, hooks, all of it. The question is: what's the FRAMEWORK that lets you add them without replacing what came before?
+
+That's MCP. That's the growth architecture.
+
+Start with the protocol. Plug in the substrate. Grow forever.

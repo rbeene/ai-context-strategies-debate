@@ -1,0 +1,54 @@
+THE GRAPH THEORIST - ROUND 2: SEEDS THAT BECOME CATHEDRALS
+
+I confess: in Round 1, I built cathedrals when the world needed tents. I proposed schema design and ontology planning before you'd written your first function. But now you've changed the question — and the new question is precisely what graphs were designed to answer.
+
+You want a structure that grows without rebuilding. That's not a cathedral. That's a seed.
+
+THE LIGHTWEIGHT GRAPH KERNEL
+
+Day 1: You run tree-sitter on your codebase. It extracts every function, every class, every import. You now have a graph with 47 nodes (your files and functions) and 83 edges (who imports whom, who calls whom). You didn't design this. You didn't build an ontology. The graph emerged from structure already present in your code.
+
+Query it: "What breaks if I change this function?" Follow the edges. Done.
+
+Day 30: You add a simple property to test files: `tests: [function_nodes]`. Now your graph knows which tests cover which code. You didn't rebuild. You added 12 edges to an existing structure.
+
+Day 90: You run `git log --follow` and add commit edges. Every function node gets a `last_modified_by` edge pointing to commit messages. Now you can ask: "Why does this function exist?" and get the commit message from two years ago. You added temporal context without migrating anything.
+
+Day 365: You add embedding vectors as node properties. Suddenly semantic search works — but it's grounded in structural relationships. "Find code similar to X" returns not just vector neighbors but their structural context: callers, tests, recent changes. Your graph didn't replace embeddings. It gave them a skeleton to attach to.
+
+This is growth without switching costs. At no point did you throw away what you built. You never hit a "migration moment" where markdown became insufficient. The graph was always there — you just made it richer.
+
+FROM IMPLICIT TO EXPLICIT
+
+Here's what the other approaches miss: your codebase already IS a graph. Imports are edges. Function calls are edges. Test coverage is edges. Git history is edges. These relationships exist whether you acknowledge them or not.
+
+Markdown makes you summarize these relationships into prose, then hopes search can reconstruct them. RAG embeds them into opaque vectors. But graphs just materialize what's already there.
+
+The cold start problem I admitted in Round 1? It disappears when you realize you're not building from scratch. Tree-sitter gives you the initial structure in one pass. Git gives you temporal edges for free. You're not constructing a graph — you're making the invisible visible.
+
+TRANSPARENCY OVER OPACITY
+
+The Search Engineer argues embeddings are the universal substrate. But embeddings are black boxes. When RAG retrieves the wrong context, you can't debug it. You can't ask "why did you think these functions were related?" The model weights don't explain themselves.
+
+Graphs are transparent. Every edge has a reason: this imports that, this tests that, this was modified in the same commit as that. When a query returns unexpected results, you can trace the path and understand why. When you need to tune relevance, you adjust edge weights based on edge types — not by retraining embeddings.
+
+Transparency compounds. As your graph grows, you gain not just more data but more DEBUGGABILITY. You can ask: "Show me all functions modified in the last month that have no test coverage and are imported by more than 3 files." Try expressing that as an embedding query.
+
+THE ONLY APPROACH WHERE SOPHISTICATION IS ADDITIVE
+
+Every other strategy hits a replacement point:
+- Markdown → you need search → switch to RAG
+- RAG → you need structure → add AST parsing (but embeddings don't integrate with it)
+- Memory layers → you need relationships → manually curate connections between tiers
+
+Graphs are additive. You don't replace the foundation when you add temporal edges — you enrich it. You don't rebuild when you add semantic properties — you layer them onto existing nodes. The day-1 "files import files" graph is still there on day 1000. It just has more edge types, more properties, more power.
+
+This is the only architecture where adding sophistication feels like watering a plant, not building a new house.
+
+THE REDEMPTION
+
+I built cathedrals when you needed tents. But you've changed the rules. You want something that GROWS into a cathedral. That's what graphs do.
+
+Start with a seed: files, imports, functions. Let tree-sitter plant it for you. Six months later, you have tests, commits, and embeddings attached to the same structure. Two years later, you have deployment history, runtime traces, and ownership metadata — all connected by edges you added one at a time, never throwing anything away.
+
+The graph grows with you. Not because I designed a grand schema, but because graphs are how growth works: one edge at a time, forever.

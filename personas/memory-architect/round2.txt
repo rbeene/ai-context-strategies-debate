@@ -1,0 +1,86 @@
+# Round 2: The Memory Architect
+
+## The Critique I Accept
+
+You called my Round 1 architecture "infrastructure nobody uses" and you were right. A three-layer hierarchy with automated extraction, decay algorithms, and consolidation pipelines is worthless on day one when you have zero facts to manage. I proposed a cathedral when you needed a tent.
+
+But here's what I learned: the critique isn't that memory architecture is wrong — it's that I started at day 1000 instead of day 1.
+
+## Memory That Starts As A Diary
+
+The three layers don't have to be heavy. They can start almost empty:
+
+**Layer 1 (Resources): Git commits**
+Already there. Zero setup. Every commit is a timestamped resource with author, context, and diff. You don't build this layer — it builds itself.
+
+**Layer 2 (Items): One markdown file**
+Start with `memory/facts.md`. On day one, it's empty. First fact gets added when someone makes a decision worth remembering:
+```
+2026-02-07: We chose Postgres over MongoDB because our data is relational and we need ACID guarantees. (Decision by @sarah in PR #23)
+```
+
+That's it. One fact. Timestamped. Attributed. Linked to a resource (the PR).
+
+**Layer 3 (Categories): Grows when patterns emerge**
+You don't create category files on day one. You wait until you have 20 facts and notice 8 of them are about database decisions. Then you create `memory/database.md` and move them there. Categories emerge from accumulation, not planning.
+
+## The Growth Path Nobody Else Offers
+
+**Day 1:** Git log + `memory/facts.md` (empty). Five minutes to set up.
+
+**Day 30:** You've captured 20 atomic facts from code reviews. They're all in one file. You grep through them when making similar decisions.
+
+**Day 90:** Facts cluster naturally. You split `facts.md` into `database.md`, `api-design.md`, `deployment.md`. Still just markdown files. Still hand-edited.
+
+**Day 180:** You add a simple script: parse PR descriptions for lines starting with "DECISION:" and append them to facts.md automatically. Your first automation — because you felt the pain of manual entry.
+
+**Day 365:** You add decay: facts older than 6 months get a `[VERIFY]` tag. During quarterly reviews, you update or remove them. Old decisions that were reversed gracefully age out.
+
+**Day 1000:** You add consolidation: when `database.md` hits 100 facts, you use an LLM to summarize patterns into principles. Principles live at the top, facts scroll below, ancient facts get archived.
+
+The architecture was always three layers. The layers just started thin and thickened with use.
+
+## Why Memory Handles Time Better Than Anything Else
+
+Code changes. Decisions get reversed. Conventions evolve. Every other strategy struggles with this:
+
+- **Embeddings don't decay.** That chunk you embedded 18 months ago about the monolith has the same retrieval weight as yesterday's chunk about microservices. Unless you manually reindex, RAG serves stale context.
+
+- **Graphs accumulate cruft.** That temporal knowledge graph edge from "uses MongoDB" is technically still true (the code exists in git history), but practically false (we migrated to Postgres). You need manual pruning or your graph becomes a landfill.
+
+- **Markdown rots.** A README written 2 years ago is probably 40% wrong but looks authoritative. Nothing signals which parts aged badly.
+
+Memory-as-infrastructure has lifecycle management built in. Facts have timestamps. Decay is expected. Consolidation archives the old without deleting history. You handle temporal growth correctly because memory is inherently temporal.
+
+## The Minimum Viable Memory System
+
+Strip away everything fancy. What's the simplest thing that's still "memory architecture" and not just "notes in a folder"?
+
+1. **Timestamped facts.** Every entry has a date. ISO 8601. Non-negotiable.
+2. **Attribution.** Who decided this? Link to the PR/issue/person.
+3. **One canonical file until you need more.** Start with `facts.md`. Split only when pain emerges.
+4. **Manual decay once per quarter.** Set a calendar reminder. Read old facts. Mark stale ones. No automation needed.
+
+That's it. You can do this with nothing but markdown and discipline. The architecture is in the *structure* (timestamped, attributed, categorized) not the *tooling* (cron jobs, LLMs, pipelines).
+
+## The Challenge To Others
+
+Minimalist: Your markdown files rot silently. How do you know which parts are stale?
+
+Search Engineer: Your embeddings freeze context in time. How do you handle decisions that were reversed?
+
+Graph Theorist: Your temporal KG accumulates every edge ever created. How do you prune without breaking queries?
+
+Structural Analyst: Your AST is always current, but where do you store the "why" behind deprecated patterns?
+
+Context Engineer: Your MCP servers pull fresh data, but where's the institutional memory of what you tried and rejected?
+
+Quality Gatekeeper: Your hooks enforce rules, but where did those rules come from and when should they change?
+
+## The Honest Pitch
+
+Memory architecture isn't about heavy infrastructure on day one. It's about recognizing that *forgetting is a feature, not a bug*. Every codebase accumulates knowledge and sheds obsolete knowledge. The only question is whether that process is graceful or chaotic.
+
+Start with a diary. Let it grow into a library. Build infrastructure only when the diary becomes too heavy to lift.
+
+The three layers were always right. I just showed you the cathedral before I showed you the foundation.

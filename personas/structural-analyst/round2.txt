@@ -1,0 +1,69 @@
+# Round 2: The Structural Analyst
+
+## AST as Substrate: The Only Architecture That Grows Without Replacement
+
+Let me be clear: AST alone cannot tell you why. It cannot capture intent, rationale, or the conversation that led to a design decision. Round 1 established this limitation conclusively.
+
+But here's what everyone missed: AST isn't competing to be the complete solution. It's competing to be the SUBSTRATE—the foundational layer that every other approach must eventually discover or reinvent.
+
+## The Accretion Model: Day 1 to Day 1000
+
+**Day 1**: You run tree-sitter. Zero configuration. No documentation to write, no embeddings to compute, no schema to design. You now have ground truth about every function, class, import, and call site in your codebase. Cost: one parse pass.
+
+**Day 30**: Quality Gatekeeper wants enforcement hooks. Where do hooks check for violations? They consume AST queries. "Block any function over 50 lines" doesn't grep the code—it queries the AST. The hook layer grows FROM the structural layer. No replacement needed.
+
+**Day 90**: You want temporal understanding. Run `git blame` on every AST node. Now you know WHO wrote WHAT and WHEN. This isn't a separate graph database—it's AST nodes annotated with authorship metadata. Memory Architect's temporal layer just snapped onto the structural substrate.
+
+**Day 365**: Search Engineer wants RAG. Naive approach: chunk by token count, lose all structural coherence. AST approach: chunk by function boundaries, class definitions, module structure. Your embeddings now represent semantically meaningful units. RAG grows FROM AST, not alongside it.
+
+**Day 1000**: Graph Theorist wants the full knowledge graph. Where does it come from? Diff every AST across git history. Each commit is an AST delta. Track which functions changed together, which modules co-evolve, which authors collaborate on which subsystems. The graph materializes from AST evolution over time. It was always implicit in the structural history.
+
+## The Zero-Cost Argument
+
+Every other approach requires initial investment:
+
+- Markdown requires writing (and maintaining when code changes)
+- RAG requires computing embeddings (and recomputing when models improve)
+- Knowledge graphs require schema design (and migration when requirements evolve)
+- MCP requires tool configuration (and updates when APIs change)
+- Memory requires storage design (and compression strategies as data grows)
+
+AST requires parsing. That's it. And unlike every other artifact, the AST is REGENERATED fresh from source every time. When your code changes, you don't migrate the AST—you just parse again. There is no accumulated technical debt in the structural layer because there is no accumulated state. The source IS the state.
+
+## Structural Accretion vs. Layer Replacement
+
+Here's the critical insight: most approaches require REPLACING layers as complexity grows. You start with markdown, hit limits, replace with RAG. You start with flat embeddings, hit limits, replace with graph database. Each replacement is a switching cost.
+
+AST doesn't get replaced—it gets ENRICHED. You don't switch from AST to something else. You add git blame (authorship), add call graph analysis (dependencies), add diff tracking (evolution), add embedding metadata (semantic search). Each addition accretes onto the structural foundation without invalidating what came before.
+
+This is what I mean by substrate. The AST is the invariant. Everything else is variable enrichment on top of it.
+
+## The Honest Limitation: Where Does WHY Come From?
+
+But I cannot claim AST captures why. And here's where I need the other personas: the lightest-weight WHY layer that snaps onto AST is COMMENT EXTRACTION + PR METADATA.
+
+- Tree-sitter can extract docstrings and inline comments. That's intent-at-write-time.
+- Git history provides PR descriptions and commit messages. That's intent-at-merge-time.
+- Together, these form a "just-in-time documentation layer" that lives alongside the structural model.
+
+The key: these annotations REFERENCE AST nodes. A docstring describes a function (AST node). A commit message describes a set of changed lines (AST diff). The why-layer is spatially indexed by the what-layer.
+
+## The Challenge to Others
+
+Which of you can claim zero switching cost?
+
+- Minimalist: when markdown gets stale, how do you migrate without losing coverage?
+- Search Engineer: when embedding models improve, how do you reindex without downtime?
+- Graph Theorist: when schema evolves, how do you migrate relationships without breaking queries?
+
+Only AST regenerates from source with zero migration cost. Your code is the single source of truth. Parse it again, and you're current.
+
+## The Verdict: AST as Inevitable Foundation
+
+Even if you start elsewhere, you'll eventually need structure. Markdown needs link checking (requires parsing). RAG needs coherent chunks (requires parsing). Graphs need accurate edges (requires parsing). Hooks need violation detection (requires parsing).
+
+You can start without AST, but you'll grow into it. Or you can start with AST and grow everything else on top of it.
+
+The only architecture that grows without replacement is the one that begins with regenerable ground truth: the syntax tree of your code itself.
+
+Start with structure. Add semantics when needed. But never replace the foundation.

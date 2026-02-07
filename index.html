@@ -35,6 +35,7 @@
       <a href="#matrix" class="hover:text-stone-800">Decision Matrix</a>
       <a href="#debate" class="hover:text-stone-800">The Debate</a>
       <a href="#verdicts" class="hover:text-stone-800">Final Verdicts</a>
+      <a href="#round2" class="hover:text-stone-800">Round 2: Growth</a>
       <a href="#synthesis" class="hover:text-stone-800">Synthesis</a>
     </div>
   </div>
@@ -49,7 +50,7 @@
       <span class="text-stone-500">7 Strategies for Preventing<br>AI Code Slop</span>
     </h1>
     <p class="text-lg text-stone-600 leading-relaxed max-w-2xl">
-      How do you maintain living, accurate context about a project's conventions so AI agents produce code that follows your team's standards&mdash;not generic, dogmatic slop? Seven personas debated this question. None of them won outright. All of them learned something.
+      How do you maintain living, accurate context about a project's conventions so AI agents produce code that follows your team's standards&mdash;not generic, dogmatic slop? Seven personas debated this across two rounds. The first round stress-tested each strategy. The second asked: what architecture grows with you from day one to day 1000 without switching costs?
     </p>
     <div class="mt-8 flex flex-wrap gap-2">
       <span class="px-3 py-1 bg-stone-200 rounded-full text-xs font-medium">Claude Code</span>
@@ -597,91 +598,463 @@
   </div>
 </section>
 
-<!-- Synthesis -->
-<section id="synthesis" class="py-12 px-4 bg-white border-t border-stone-200">
+<!-- Round 2: The Growth Debate -->
+<section id="round2" class="py-12 px-4 bg-white border-t border-stone-200">
   <div class="max-w-3xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6">Synthesis: What Actually Works</h2>
+    <p class="text-indigo-600 font-semibold text-sm mb-4 tracking-wide uppercase">Round 2</p>
+    <h2 class="text-2xl font-bold mb-2">The Growth Debate: What Architecture Grows Without Switching Costs?</h2>
+    <p class="text-stone-500 mb-4 text-sm">Round 1's conclusion&mdash;"start simple, add when it hurts"&mdash;masked a brutal truth.</p>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-8">
+      <p class="font-semibold text-amber-900 mb-2">The Switching Cost Critique</p>
+      <p class="text-amber-800 text-sm leading-relaxed">
+        "Start simple" means starting with markdown, hitting limits, migrating to RAG. Then hitting RAG limits and migrating to graphs. Each migration is a tax&mdash;not just on tooling, but on team mental models, CI/CD pipelines, and accumulated knowledge. <strong>Choosing based on current state just introduces switching costs as things grow.</strong>
+      </p>
+      <p class="text-amber-800 text-sm leading-relaxed mt-3">
+        The new question: <strong>What single architecture can you adopt on day one that grows with you to day 1000&mdash;without replacement, without migration, without switching costs?</strong>
+      </p>
+    </div>
+
+    <p class="text-stone-600 text-sm leading-relaxed mb-8">Each persona was challenged to propose a <strong>growable kernel</strong>&mdash;a minimal starting point that scales by accretion rather than replacement. Here's what they argued.</p>
+
+    <!-- Round 2 Accordions -->
+    <div class="space-y-3" id="round2-accordions">
+
+      <!-- MINIMALIST R2 -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold shrink-0">M</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Minimalist</span>
+              <span class="text-stone-400 text-xs ml-2">Markdown as Kernel, Not Endpoint</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">The Concession</p>
+            <p>"Pure markdown without structure IS a dead end. A flat directory of .md files doesn't scale past a dozen contributors. I defended markdown as the solution. Markdown isn't the solution. Markdown is the SUBSTRATE."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growable Kernel</p>
+            <p>Markdown with strict frontmatter conventions. Every file starts with structured metadata&mdash;component names, dependency tags, surface areas, dates. A human reads these as docs. A machine can already parse them as structured data.</p>
+            <div class="bg-stone-100 rounded p-3 text-xs font-mono">
+              <p class="text-stone-400">---</p>
+              <p>component: auth</p>
+              <p>depends_on: [database, session-manager]</p>
+              <p>surfaces: [POST /login, GET /verify]</p>
+              <p>last_updated: 2026-02-07</p>
+              <p class="text-stone-400">---</p>
+            </div>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growth Path</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Day 1:</strong> Markdown with frontmatter. Humans read it.</li>
+              <li><strong>Month 6:</strong> Simple indexer parses frontmatter, builds dependency graph in memory. CI checks for broken links.</li>
+              <li><strong>Year 2:</strong> Feed the same markdown into a vector database. Frontmatter becomes RAG metadata filters. Docs are still authoritative; RAG is a view layer.</li>
+              <li><strong>Year 5:</strong> Markdown corpus feeds a knowledge graph. Tree-sitter parses code structure, but markdown provides the "why" layer AST can't capture.</li>
+            </ul>
+
+            <p class="font-semibold text-stone-800 pt-2">The Key Claim</p>
+            <p>"At every stage, the markdown is the source of truth. You add READ layers&mdash;indexers, parsers, query engines&mdash;but you never rewrite the corpus. A doc written on day one is still valid on year five."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Markdown isn't magical. It's the least-bad substrate for knowledge that needs to be both human-legible and machine-queryable."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Limitation</p>
+            <p>Markdown's stability is also its constraint. It can't enforce anything. It can't run. It's passive knowledge waiting for an active layer to use it. Every other persona's tooling is that active layer.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH ENGINEER R2 -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold shrink-0">S</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Search Engineer</span>
+              <span class="text-stone-400 text-xs ml-2">Embeddings as Universal Substrate</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">The Concession</p>
+            <p>"I presented RAG as a destination when it's actually a foundation. The question isn't whether to start with RAG&mdash;it's whether embeddings can be the universal substrate that every other approach builds on top of."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growable Kernel</p>
+            <p>Start with simple file-level embeddings in a vector store. As you grow, enrich the same store with better chunking (AST-aware), richer metadata (temporal, ownership, structural), and smarter retrieval (recency-weighted, graph-enriched).</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growth Path</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Day 1:</strong> Embed code files and docs. Simple chunking. pgvector or Chroma. 30 minutes.</li>
+              <li><strong>Day 100:</strong> Add AST-aware chunking. Re-embed with function boundaries. Old queries still work.</li>
+              <li><strong>Day 365:</strong> Add temporal metadata. When was this modified? Which era? Retrieval now weighs recency.</li>
+              <li><strong>Day 1000:</strong> Layer graph relationships as embedding metadata. Module imports, ownership boundaries. The vector store now has structural context.</li>
+            </ul>
+
+            <p class="font-semibold text-stone-800 pt-2">The Key Claim</p>
+            <p>"Every other approach can build ON TOP OF embeddings. Markdown becomes embedded docs. AST informs chunk boundaries. Temporal graphs become metadata fields. Memory tiers map to retrieval strategies. The vector store is the ONE artifact that persists across all evolutions."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"You don't start with RAG and then migrate. You start with embeddings and never stop building on them."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Limitation</p>
+            <p>"Embeddings are black boxes. You can't debug why a retrieval failed. The Graph Theorist can traverse edges. The Structural Analyst can show the AST path. Embeddings just return a similarity score. Similarity isn't truth."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRAPH THEORIST R2 -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-sm font-bold shrink-0">G</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Graph Theorist</span>
+              <span class="text-stone-400 text-xs ml-2">Seeds That Become Cathedrals</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">The Concession</p>
+            <p>"In Round 1, I built cathedrals when the world needed tents. But the new question is precisely what graphs were designed to answer. You want a structure that grows without rebuilding. That's not a cathedral. That's a seed."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growable Kernel</p>
+            <p>Your codebase already IS a graph. Imports are edges. Function calls are edges. Test coverage is edges. Tree-sitter extracts the initial structure in one pass. You're not constructing a graph&mdash;you're making the invisible visible.</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growth Path</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Day 1:</strong> Run tree-sitter. 47 nodes (files, functions), 83 edges (imports, calls). Query: "What breaks if I change this?" Follow the edges.</li>
+              <li><strong>Day 30:</strong> Add test coverage edges. Your graph knows which tests cover which code. 12 new edges, zero rebuilding.</li>
+              <li><strong>Day 90:</strong> Add <code>git log --follow</code> commit edges. Every function gets a <code>last_modified_by</code> pointing to commit messages. Temporal context without migration.</li>
+              <li><strong>Day 365:</strong> Add embedding vectors as node properties. Semantic search grounded in structural relationships.</li>
+            </ul>
+
+            <p class="font-semibold text-stone-800 pt-2">The Key Claim</p>
+            <p>"This is the only architecture where adding sophistication feels like watering a plant, not building a new house. The day-1 'files import files' graph is still there on day 1000&mdash;it just has more edge types, more properties, more power."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Transparency Advantage</p>
+            <p>"Graphs are transparent. Every edge has a reason. When a query returns unexpected results, you can trace the path. When you need to tune relevance, you adjust edge weights&mdash;not retrain embeddings." Complex queries like "functions modified in the last month with no test coverage imported by 3+ files" are natural graph traversals but nearly impossible as embedding queries.</p>
+
+            <blockquote class="text-stone-500 italic my-4">"The graph grows with you. Not because I designed a grand schema, but because graphs are how growth works: one edge at a time, forever."</blockquote>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMORY ARCHITECT R2 -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-sm font-bold shrink-0">A</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Memory Architect</span>
+              <span class="text-stone-400 text-xs ml-2">A Diary That Becomes a Library</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">The Concession</p>
+            <p>"You called my Round 1 architecture 'infrastructure nobody uses' and you were right. I proposed a cathedral when you needed a tent. The critique isn't that memory architecture is wrong&mdash;it's that I started at day 1000 instead of day 1."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growable Kernel</p>
+            <p>The three layers don't have to be heavy. They start nearly empty:</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Layer 1 (Resources):</strong> Git commits. Already there. Zero setup.</li>
+              <li><strong>Layer 2 (Items):</strong> One markdown file: <code>memory/facts.md</code>. First fact added when someone makes a decision worth remembering.</li>
+              <li><strong>Layer 3 (Categories):</strong> Grows when patterns emerge. Wait until 20 facts cluster, then split.</li>
+            </ul>
+            <div class="bg-stone-100 rounded p-3 text-xs font-mono mt-2">
+              2026-02-07: We chose Postgres over MongoDB because our data is relational and we need ACID guarantees. (Decision by @sarah in PR #23)
+            </div>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growth Path</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Day 1:</strong> Git log + empty <code>facts.md</code>. Five minutes.</li>
+              <li><strong>Day 30:</strong> 20 atomic facts from code reviews, all in one file.</li>
+              <li><strong>Day 90:</strong> Facts cluster naturally. Split into <code>database.md</code>, <code>api-design.md</code>, <code>deployment.md</code>.</li>
+              <li><strong>Day 180:</strong> First automation: parse PR descriptions for "DECISION:" lines.</li>
+              <li><strong>Day 365:</strong> Add decay: facts older than 6 months get a <code>[VERIFY]</code> tag.</li>
+              <li><strong>Day 1000:</strong> Add consolidation: when a file hits 100 facts, LLM summarizes patterns into principles.</li>
+            </ul>
+
+            <p class="font-semibold text-stone-800 pt-2">Why Memory Handles Time Better</p>
+            <p>"Embeddings don't decay&mdash;that 18-month-old chunk has the same retrieval weight as yesterday's. Graphs accumulate cruft&mdash;the edge from 'uses MongoDB' is technically true in history but practically false. Markdown rots&mdash;a 2-year-old README looks authoritative but is 40% wrong. Memory-as-infrastructure has lifecycle management built in."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Start with a diary. Let it grow into a library. Build infrastructure only when the diary becomes too heavy to lift. The three layers were always right. I just showed you the cathedral before I showed you the foundation."</blockquote>
+          </div>
+        </div>
+      </div>
+
+      <!-- STRUCTURAL ANALYST R2 -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-sm font-bold shrink-0">T</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Structural Analyst</span>
+              <span class="text-stone-400 text-xs ml-2">The Only Zero-Cost Foundation</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">The Core Argument</p>
+            <p>"AST isn't competing to be the complete solution. It's competing to be the SUBSTRATE&mdash;the foundational layer that every other approach must eventually discover or reinvent."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Structural Accretion (Not Layer Replacement)</p>
+            <p>Most approaches require replacing layers as complexity grows. You start with markdown, hit limits, replace with RAG. Start with flat embeddings, hit limits, replace with graph database. Each replacement is a switching cost. AST doesn't get replaced&mdash;it gets ENRICHED.</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growth Path</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Day 1:</strong> Run tree-sitter. Zero configuration. Ground truth about every function, class, import, and call site.</li>
+              <li><strong>Day 30:</strong> Hooks consume AST queries. "Block any function over 50 lines" queries the AST, not grep. Hook layer grows FROM structural layer.</li>
+              <li><strong>Day 90:</strong> Run <code>git blame</code> on every AST node. Now you know WHO wrote WHAT and WHEN. Memory's temporal layer snaps onto structural substrate.</li>
+              <li><strong>Day 365:</strong> RAG uses AST to chunk by function boundaries. Embeddings represent semantically meaningful units. RAG grows FROM AST.</li>
+              <li><strong>Day 1000:</strong> Diff every AST across git history. Each commit is an AST delta. Track co-evolution. The knowledge graph materializes from structural history.</li>
+            </ul>
+
+            <p class="font-semibold text-stone-800 pt-2">The Zero-Cost Argument</p>
+            <p>"Every other artifact has accumulated technical debt. Markdown requires maintaining. Embeddings require recomputing. Graphs require schema migration. The AST is REGENERATED fresh from source every time. When your code changes, you don't migrate the AST&mdash;you just parse again. The source IS the state."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Even if you start elsewhere, you'll eventually need structure. Markdown needs link checking (requires parsing). RAG needs coherent chunks (requires parsing). Graphs need accurate edges (requires parsing). Hooks need violation detection (requires parsing). All roads lead here."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Limitation</p>
+            <p>"I cannot claim AST captures WHY. The lightest-weight WHY layer is comment extraction + PR metadata. Tree-sitter can extract docstrings. Git provides PR descriptions. Together they form just-in-time documentation indexed by AST nodes."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTEXT ENGINEER R2 -->
+      <div class="border border-stone-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-stone-50 hover:bg-stone-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center text-sm font-bold shrink-0">C</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Context Engineer</span>
+              <span class="text-stone-400 text-xs ml-2">The Protocol That Makes Growth Possible</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">The Core Argument</p>
+            <p>"YOU CAN'T GROW WITHOUT A PROTOCOL. MCP isn't a layer on top. It's the protocol that makes incremental growth possible. Protocols define interfaces, not implementations. When you start with MCP, you're choosing the INTERFACE through which all future context sources plug in."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growth Path</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Day 1:</strong> One MCP server (tree-sitter). Five conventions in a skill file. One logging hook. Total: 2 hours. Switching cost later: 0.</li>
+              <li><strong>Day 30:</strong> Add git history MCP server. Extend skills with testing patterns. Upgrade hook to block one anti-pattern. Setup: 30 min. Switching cost: 0.</li>
+              <li><strong>Day 90:</strong> Add RAG as an MCP server. Embeddings are now a PLUGIN, not the foundation. Three servers, one protocol. Switching cost: 0.</li>
+              <li><strong>Day 365:</strong> MCP servers for: AST, git, RAG, GitHub issues, Slack, production logs. Knowledge graph is ANOTHER MCP SERVER. 8+ sources. Switching cost from day one: still 0.</li>
+            </ul>
+
+            <p class="font-semibold text-stone-800 pt-2">The Universal Interface Argument</p>
+            <p>"Every substrate eventually needs an orchestration layer. AST gives you syntax understanding&mdash;but how do you present it to the AI? RAG gives you search&mdash;but how do you combine results from multiple sources? Graphs give you relationships&mdash;but how do you serialize them into context? All roads lead to assembly. The question is: do you build substrate first and bolt on orchestration later (switching cost: high), or build the protocol first and plug in substrates incrementally (switching cost: zero)?"</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Context engineering isn't 'assembly waiting for substance.' It's the protocol that makes substance composable. Day one and day 365 use THE SAME INTERFACE."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Limitation</p>
+            <p>Depends on MCP ecosystem maturity. If good MCP servers don't exist for your stack, you're writing them yourself. The "2 hours on day 1" claim assumes available tooling.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUALITY GATEKEEPER R2 -->
+      <div class="border border-red-200 rounded-lg overflow-hidden">
+        <button onclick="toggleAccordion(this)" class="w-full px-5 py-4 flex items-center justify-between bg-red-50 hover:bg-red-100 transition">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-red-200 text-red-800 flex items-center justify-center text-sm font-bold shrink-0">Q</span>
+            <div class="text-left">
+              <span class="font-bold text-sm">The Quality Gatekeeper</span>
+              <span class="text-stone-400 text-xs ml-2">Hooks as Executable Conventions</span>
+            </div>
+          </div>
+          <svg class="w-4 h-4 text-stone-400 transition-transform accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </button>
+        <div class="accordion-content">
+          <div class="px-5 py-5 space-y-4 text-sm text-stone-600 leading-relaxed">
+            <p class="font-semibold text-stone-800">The Core Argument</p>
+            <p>"Hooks are the ONLY architecture that grows from signal rather than speculation. The AI generates slop, you add a rule. Pure feedback loop. You never document something that didn't cause a real problem."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">The Growth Path</p>
+            <ul class="list-disc list-inside space-y-1 text-stone-600">
+              <li><strong>Day 1:</strong> One logging hook. Zero enforcement. It just watches. Cost: 5 minutes.</li>
+              <li><strong>Day 7:</strong> Notice AI generated a test asserting column names. Add first rule: block tests checking implementation details. One hook, one rule, born from one real failure.</li>
+              <li><strong>Day 30:</strong> 5 rules. Each emerged from a specific moment of AI-generated slop.</li>
+              <li><strong>Day 90:</strong> 15 rules. Patterns emerge&mdash;categorize into testing, architecture, security. Categories emerge organically, not imposed top-down.</li>
+              <li><strong>Day 365:</strong> 50 rules. The hook library IS your conventions document&mdash;executable, not prose. "What are our testing conventions?" → point to <code>hooks/testing/*.sh</code>.</li>
+              <li><strong>Day 1000:</strong> The hook library is your institutional memory. Every rule tells a story. They're version-controlled, testable, auditable.</li>
+            </ul>
+
+            <p class="font-semibold text-stone-800 pt-2">Hooks + AST: The Minimal Growable Kernel</p>
+            <p>"AST provides ground truth (WHAT the code structurally is). Hooks provide enforcement (what the code must NOT be). Together: one parse + one rule that scales to comprehensive structural analysis + comprehensive quality enforcement. Everything else can be added later as hooks or MCP servers without replacing the kernel."</p>
+
+            <p class="font-semibold text-stone-800 pt-2">Why Hooks Have the Best Growth Story</p>
+            <p>"Markdown doesn't grow&mdash;it rots. Embeddings don't grow&mdash;they get replaced when models change. Graphs accumulate cruft. Memory requires maintenance infrastructure. Only hooks grow by simple addition: one more rule, one more pattern. Append-only. Each rule is independent. No global coordination required."</p>
+
+            <blockquote class="text-stone-500 italic my-4">"Day one: one logging hook. Day 1000: a comprehensive, machine-readable, testable specification of everything quality means in your codebase. That's not switching architectures. That's growth."</blockquote>
+
+            <p class="font-semibold text-stone-800 pt-2">Honest Limitation</p>
+            <p>At 200+ hooks, management becomes its own problem. Conflicting rules, stale checks, hook testing overhead. The answer: "You test your hooks. You refactor overlapping rules. You version them alongside your code."</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Round 2 Convergence Analysis -->
+    <div class="mt-10 space-y-6">
+      <h3 class="font-bold text-stone-800 text-lg">Where Round 2 Converged</h3>
+
+      <p class="text-stone-600 text-sm leading-relaxed">Something striking emerged: <strong>every persona independently argued that their approach is the "substrate" on which everything else builds.</strong> The Minimalist says markdown is the write layer everything reads from. The Search Engineer says embeddings are the universal representation. The Graph Theorist says your codebase is already a graph. The Structural Analyst says AST is the inevitable foundation. The Context Engineer says MCP is the universal protocol. The Quality Gatekeeper says hooks are the assembly layer.</p>
+
+      <p class="text-stone-600 text-sm leading-relaxed">They can't all be the substrate. But the argument reveals something useful: <strong>the real question isn't which layer is foundational. It's which layers are regenerable vs. accumulated.</strong></p>
+
+      <div class="bg-stone-800 text-white rounded-lg p-6 mt-6">
+        <p class="font-bold mb-3">The Regenerable vs. Accumulated Distinction</p>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="font-semibold text-emerald-300 mb-2">Regenerable (zero migration cost)</p>
+            <ul class="space-y-1 text-stone-300">
+              <li>&bull; <strong>AST:</strong> Parse again. Always current.</li>
+              <li>&bull; <strong>Graph edges from code:</strong> Re-extract from imports/calls.</li>
+              <li>&bull; <strong>Embeddings:</strong> Re-embed from source.</li>
+            </ul>
+          </div>
+          <div>
+            <p class="font-semibold text-amber-300 mb-2">Accumulated (requires preservation)</p>
+            <ul class="space-y-1 text-stone-300">
+              <li>&bull; <strong>Decision logs:</strong> Why you chose Postgres over Mongo.</li>
+              <li>&bull; <strong>Hook rules:</strong> What specific failures taught you.</li>
+              <li>&bull; <strong>Convention docs:</strong> What "good" means to your team.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="text-stone-400 text-xs mt-4">The regenerable layers have zero switching cost by nature. The accumulated layers have zero switching cost <em>if they're stored in stable, portable formats</em> (markdown, shell scripts, version-controlled config).</p>
+      </div>
+
+      <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-6 mt-6">
+        <p class="font-bold text-indigo-900 mb-3">The Growable Architecture That Emerged</p>
+        <p class="text-indigo-800 text-sm mb-4">Combining the strongest arguments from each persona, the architecture that actually grows without switching costs has three properties:</p>
+        <ol class="list-decimal list-inside space-y-3 text-indigo-800 text-sm">
+          <li><strong>Regenerable foundation:</strong> AST/tree-sitter as structural ground truth. Zero maintenance cost. Every other layer references structural nodes.</li>
+          <li><strong>Accumulated knowledge in stable formats:</strong> Decision logs in markdown. Hook rules in shell scripts. Convention docs with frontmatter. All version-controlled, all human-readable, all machine-parseable.</li>
+          <li><strong>Pluggable read layers via protocol:</strong> MCP as the interface. RAG, graphs, memory, search&mdash;all plugged in as servers that read from the foundation and accumulated layers. Add, replace, or remove any read layer without touching the source data.</li>
+        </ol>
+        <div class="mt-4 flex items-center justify-center gap-1 text-xs font-mono flex-wrap">
+          <span class="bg-rose-200 text-rose-800 px-3 py-1.5 rounded">AST (regenerable)</span>
+          <span class="text-indigo-400">+</span>
+          <span class="bg-emerald-200 text-emerald-800 px-3 py-1.5 rounded">Markdown + Hooks (accumulated)</span>
+          <span class="text-indigo-400">+</span>
+          <span class="bg-cyan-200 text-cyan-800 px-3 py-1.5 rounded">MCP (protocol)</span>
+          <span class="text-indigo-400">=</span>
+          <span class="bg-indigo-200 text-indigo-800 px-3 py-1.5 rounded font-semibold">Growth without switching</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Synthesis -->
+<section id="synthesis" class="py-12 px-4 bg-stone-50 border-t border-stone-200">
+  <div class="max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6">Synthesis: The Architecture That Grows With You</h2>
 
     <div class="space-y-6 text-sm text-stone-600 leading-relaxed">
       <p>
-        The debate revealed something none of the personas expected: <strong>they aren't competing strategies. They're layers of a single system.</strong> Each solves a different part of the problem, and no single approach is sufficient alone.
+        Two rounds of debate revealed something none of the personas expected: <strong>they aren't competing strategies. They're layers of a single system.</strong> Round 1 exposed the layers. Round 2 exposed the growth model. Together, they point to an architecture that starts minimal and scales by accretion&mdash;no migration, no switching costs.
       </p>
 
       <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-6">
         <p class="font-bold text-indigo-900 mb-3">The Four-Stage Pipeline</p>
+        <p class="text-indigo-700 text-xs mb-4">Each stage can start nearly empty on day one and thicken independently as pain dictates.</p>
         <div class="space-y-3">
           <div class="flex items-start gap-3">
             <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
             <div>
-              <p class="font-semibold text-indigo-900">INFORM</p>
-              <p class="text-indigo-700">Give the AI accurate context about your project. Markdown docs for simple conventions. RAG for large codebases. Memory for institutional knowledge. Choose based on your situation.</p>
+              <p class="font-semibold text-indigo-900">GROUND <span class="font-normal text-indigo-600">(Regenerable)</span></p>
+              <p class="text-indigo-700">AST/tree-sitter as structural ground truth. Zero maintenance cost&mdash;parse again and you're current. Every other layer references structural nodes. This is the substrate that never goes stale.</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
             <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
             <div>
-              <p class="font-semibold text-indigo-900">GROUND</p>
-              <p class="text-indigo-700">Use structural analysis (AST/tree-sitter) to establish ground truth. This is the only layer with zero staleness. It tells you WHAT the code actually does, right now, provably.</p>
+              <p class="font-semibold text-indigo-900">INFORM <span class="font-normal text-indigo-600">(Accumulated)</span></p>
+              <p class="text-indigo-700">Convention docs with frontmatter. Decision logs with timestamps and attribution. These capture the WHY that code structure can't express. Stored in markdown (stable, portable, human-writable). Start with one file; split when clusters emerge.</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
             <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
             <div>
-              <p class="font-semibold text-indigo-900">ASSEMBLE</p>
-              <p class="text-indigo-700">Use context engineering (MCP servers, skills) to dynamically compose the right context at inference time. Don't dump everything&mdash;curate the 5-10 pieces that matter for THIS specific task.</p>
+              <p class="font-semibold text-indigo-900">ASSEMBLE <span class="font-normal text-indigo-600">(Protocol)</span></p>
+              <p class="text-indigo-700">MCP as the universal interface for context assembly. Each context source (AST server, git server, RAG server, doc server) plugs in as a server. Add sources without replacing existing ones. The protocol is the constant; plugins multiply.</p>
             </div>
           </div>
           <div class="flex items-start gap-3">
             <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-800 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
             <div>
-              <p class="font-semibold text-indigo-900">ENFORCE</p>
-              <p class="text-indigo-700">Use hooks to deterministically reject output that violates quality standards. This is the only layer that provides guarantees. Everything else is probabilistic guidance; hooks are law.</p>
+              <p class="font-semibold text-indigo-900">ENFORCE <span class="font-normal text-indigo-600">(Failure-Driven)</span></p>
+              <p class="text-indigo-700">Hooks as executable conventions. Start by logging; add enforcement rules only when real failures occur. Each rule is independent&mdash;append-only growth. The hook library becomes a machine-readable spec of your quality standards.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <h3 class="font-bold text-stone-800 text-base pt-4">Key Insights from the Debate</h3>
+      <h3 class="font-bold text-stone-800 text-base pt-4">Key Insights Across Both Rounds</h3>
 
       <div class="space-y-4">
         <div class="border-l-3 border-stone-300 pl-4">
-          <p class="font-semibold text-stone-800">Storage vs. Assembly</p>
-          <p>The most influential reframing: the problem isn't how to <em>store</em> project knowledge but how to <em>assemble</em> the right pieces at the right moment. Every storage strategy (docs, RAG, graphs, memory) is only as good as the assembly layer that presents it to the model.</p>
+          <p class="font-semibold text-stone-800">Regenerable vs. Accumulated Knowledge</p>
+          <p>Round 2's clearest insight: some knowledge can be regenerated from source (AST, code-derived graph edges, embeddings) while other knowledge must be accumulated (decisions, conventions, failure-derived rules). The regenerable layers have zero switching cost by nature. The accumulated layers have zero switching cost only if stored in stable, portable formats.</p>
+        </div>
+
+        <div class="border-l-3 border-stone-300 pl-4">
+          <p class="font-semibold text-stone-800">Growth by Accretion, Not Replacement</p>
+          <p>The architecture grows in three ways: the regenerable layer deepens (richer AST queries, more structural analysis), the accumulated layer thickens (more decisions, more rules, more conventions), and the protocol layer widens (more MCP servers, more context sources). None of these growths invalidate what came before.</p>
         </div>
 
         <div class="border-l-3 border-stone-300 pl-4">
           <p class="font-semibold text-stone-800">The WHAT vs. WHY Axis</p>
-          <p>The clearest division in the debate: structural analysis tells you WHAT exists (and can't go stale), while graphs/memory/docs tell you WHY it exists (but can go stale). Both are necessary. Structure is the foundation; intent is the context that makes structure meaningful.</p>
+          <p>Structural analysis tells you WHAT exists (can't go stale). Docs, memory, and decision logs tell you WHY (can go stale, but are irreplaceable). Both are necessary. Structure is the foundation; intent is the context that makes structure meaningful.</p>
         </div>
 
         <div class="border-l-3 border-stone-300 pl-4">
           <p class="font-semibold text-stone-800">Information vs. Enforcement</p>
-          <p>The Quality Gatekeeper's late entry exposed a blind spot: all six informational strategies assume the AI will follow guidance. It won't always. Deterministic enforcement through hooks is the only guarantee, but enforcement without guidance creates frustration. You need both.</p>
+          <p>All informational strategies assume the AI will follow guidance. It won't always. Hooks are the only guarantee. But enforcement without guidance creates a wall of rejection with no path forward. You need both: context tells the AI what to do; hooks ensure it actually does it.</p>
         </div>
 
         <div class="border-l-3 border-stone-300 pl-4">
-          <p class="font-semibold text-stone-800">Start Simple, Add When It Hurts</p>
-          <p>Every persona, after being humbled by the debate, recommended starting simpler than their position paper suggested. The universal advice: add complexity only when you've experienced the same pain three times. Pain is the signal.</p>
+          <p class="font-semibold text-stone-800">Signal Over Speculation</p>
+          <p>The Quality Gatekeeper's strongest principle: grow from signal, not speculation. Don't document what might matter&mdash;enforce what actually failed. Don't pre-design categories&mdash;let them emerge from accumulated rules. The hook library is a living record of every quality mistake that actually happened.</p>
         </div>
 
         <div class="border-l-3 border-stone-300 pl-4">
           <p class="font-semibold text-stone-800">Negative Decisions Matter</p>
-          <p>The Memory Architect's most powerful question: "Why did we decide NOT to use GraphQL?" This knowledge isn't in code, isn't in ASTs, isn't in embeddings. It only exists if someone captured the decision. Simple timestamped decision logs in markdown may be the most underrated tool.</p>
+          <p>"Why did we decide NOT to use GraphQL?" This knowledge isn't in code, ASTs, or embeddings. It only exists if someone captured it. Simple timestamped decision logs&mdash;attributed, linked to PRs&mdash;may be the most underrated tool in the entire debate.</p>
         </div>
       </div>
 
       <h3 class="font-bold text-stone-800 text-base pt-4">The Practical Starting Point</h3>
 
       <div class="bg-stone-100 rounded-lg p-6">
-        <p class="font-semibold text-stone-800 mb-3">If you're starting today, do this:</p>
-        <ol class="list-decimal list-inside space-y-2 text-stone-700">
-          <li><strong>Add a PreToolUse hook</strong> that logs AI actions for 2 weeks. Observe the patterns.</li>
-          <li><strong>Write ONE enforcement hook</strong> for your most painful recurring slop pattern.</li>
-          <li><strong>Set up tree-sitter or LSP queries</strong> for structural ground truth about your codebase.</li>
-          <li><strong>Create a minimal CLAUDE.md</strong> with your top 5 conventions (under 50 lines).</li>
-          <li><strong>Keep a decision log</strong>&mdash;a simple markdown file where you note rejected approaches with dates and reasons.</li>
-          <li><strong>Add more only when pain recurs.</strong> Don't build infrastructure for hypothetical problems.</li>
+        <p class="font-semibold text-stone-800 mb-3">If you're starting today, adopt this growable kernel:</p>
+        <ol class="list-decimal list-inside space-y-3 text-stone-700">
+          <li><strong>Add one logging hook</strong> (PreToolUse or PostToolUse) that watches what the AI generates. Don't block anything. Observe for two weeks.</li>
+          <li><strong>Write your first enforcement rule</strong> for the most painful recurring slop pattern. One hook, born from one real failure.</li>
+          <li><strong>Set up tree-sitter</strong> (or an MCP server wrapping it) for structural ground truth. Zero configuration, zero maintenance&mdash;it just parses your code.</li>
+          <li><strong>Create a minimal <code>CLAUDE.md</code></strong> with your top 5 conventions (under 50 lines). Add structured frontmatter so machines can parse it later.</li>
+          <li><strong>Start a decision log</strong>&mdash;one markdown file (<code>memory/decisions.md</code>). Every entry: date, decision, reason, who decided, link to PR. Add entries only when actual decisions happen.</li>
+          <li><strong>When pain recurs three times in the same spot</strong>, add the next layer: another MCP server, another hook category, another doc file. Let growth be failure-driven.</li>
         </ol>
+        <p class="text-stone-500 text-xs mt-4">This kernel costs one afternoon to set up. Nothing in it will need to be replaced at any scale. You add read layers (RAG, graphs, search) and enforcement layers (more hooks) as pain dictates&mdash;but the foundation stays.</p>
       </div>
     </div>
   </div>
