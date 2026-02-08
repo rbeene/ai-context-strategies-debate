@@ -21,6 +21,7 @@
     <a href="index.html" class="text-stone-400 text-xs hover:text-stone-600">&larr; The Context Wars</a>
     <div class="flex gap-6 text-xs font-medium text-stone-500">
       <a href="#today" class="text-red-600 font-semibold hover:text-red-800">Start Here</a>
+      <a href="#assess" class="hover:text-stone-800">Assess</a>
       <a href="#rag" class="hover:text-stone-800">RAG</a>
       <a href="#playbook" class="hover:text-stone-800">Playbook</a>
       <a href="#anti-patterns" class="hover:text-stone-800">Anti-Patterns</a>
@@ -264,6 +265,254 @@ exit 0</code></pre>
   </div>
 </section>
 
+<!-- AI-Powered Pattern Assessment -->
+<section id="assess" class="py-10 px-4 border-t-4 border-indigo-500 bg-indigo-50/30">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">THE KEY MOVE</span>
+      <h2 class="text-xl font-bold">Use AI to Map Your Own Codebase</h2>
+    </div>
+
+    <div class="space-y-4 text-sm text-stone-600 leading-relaxed mb-8">
+      <p>
+        The playbook above tells you to identify canonical vs. legacy patterns. But in a messy codebase, <strong>you might not even know what patterns exist</strong>. There might be three auth approaches and you only know about two. There might be a data access pattern someone introduced six months ago that's actually better than your "official" one.
+      </p>
+      <p>
+        Instead of manually auditing every module, <strong>have the AI do the analysis and present its findings for your judgment</strong>. The AI scans, surfaces competing patterns, shows you real code from your repo, and you decide what's canonical and what's legacy. Then it generates your CLAUDE.md and hook rules from your selections.
+      </p>
+      <p class="font-semibold text-stone-800">
+        This is a real Claude Code skill. Copy the file below into your project, run <code class="bg-white px-1.5 py-0.5 rounded text-xs">/assess-patterns</code>, and walk through the interactive selection.
+      </p>
+    </div>
+
+    <!-- The Skill File -->
+    <div class="mb-8">
+      <p class="text-xs font-semibold text-stone-500 mb-1 uppercase tracking-wide">File: <code>.claude/skills/assess-patterns/SKILL.md</code></p>
+      <pre class="bg-stone-800 text-stone-100 rounded-lg p-4 text-xs overflow-x-auto leading-relaxed"><code><span class="text-stone-500">---</span>
+<span class="text-indigo-300">name</span>: assess-patterns
+<span class="text-indigo-300">description</span>: Analyze codebase for competing patterns and present them for human selection as canonical vs. legacy
+<span class="text-indigo-300">disable-model-invocation</span>: true
+<span class="text-indigo-300">allowed-tools</span>: Read, Grep, Glob, Bash(git log *, git blame *, wc *)
+<span class="text-indigo-300">argument-hint</span>: [optional: specific area like "auth" or "testing" or "all"]
+<span class="text-stone-500">---</span>
+
+Analyze this codebase to identify competing patterns. Your goal is to
+surface every place where multiple approaches exist for the same concern,
+so a human can designate which is canonical and which is legacy.
+
+<span class="text-stone-500">## Step 1: Scan for Pattern Families</span>
+
+Examine the codebase structure and identify pattern families where
+MORE THAN ONE distinct approach exists. Common families include:
+
+- <span class="text-amber-300">Authentication/Authorization</span>: Devise? Custom service? Concern-based? Multiple?
+- <span class="text-amber-300">Data Access</span>: Direct ActiveRecord? Repository pattern? Service objects? Raw SQL?
+- <span class="text-amber-300">Testing</span>: What do tests actually assert? Behavioral? Column-level? Mock strategy?
+- <span class="text-amber-300">Error Handling</span>: Rescue blocks? Custom error classes? Error response format?
+- <span class="text-amber-300">API Responses</span>: Serializers? Jbuilder? as_json? Manual hash construction?
+- <span class="text-amber-300">Validation</span>: Model validations? Form objects? Controller-level checks?
+- <span class="text-amber-300">Background Jobs</span>: Sidekiq? GoodJob? Delayed Job? Mixed frameworks?
+- <span class="text-amber-300">Service Layer</span>: Service objects? Interactors? Command pattern? None?
+- <span class="text-amber-300">Frontend Integration</span>: Turbo? React? jQuery? Mixed?
+
+Scan for whatever actually exists. Don't assume these categories apply.
+Focus on $ARGUMENTS if specified, otherwise scan all families.
+
+<span class="text-stone-500">## Step 2: Present Findings for Each Family</span>
+
+For each family where you find 2+ distinct approaches, present:
+
+<span class="text-stone-500">### [Pattern Family Name]</span>
+
+<span class="text-stone-500">**Approach A: [descriptive name]**</span>
+- Files: [2-3 representative file paths]
+- Last modified: [use git log to check recency]
+- Occurrences: [count of files using this approach]
+- Example: [3-5 line code snippet showing the actual pattern]
+
+<span class="text-stone-500">**Approach B: [descriptive name]**</span>
+- Files: [2-3 representative file paths]
+- Last modified: [use git log to check recency]
+- Occurrences: [count of files using this approach]
+- Example: [3-5 line code snippet showing the actual pattern]
+
+<span class="text-stone-500">**Assessment**</span>: Which appears more modern/maintainable and why.
+Note if git history suggests a migration was started but not finished.
+
+Then ASK the user:
+"Which approach should be canonical? Which is legacy? Or skip this family?"
+
+<span class="text-stone-500">## Step 3: Generate Artifacts from Selections</span>
+
+After the human selects for all families, generate three outputs:
+
+<span class="text-stone-500">### 1. CLAUDE.md Entries</span>
+Generate ready-to-paste sections:
+```
+<span class="text-stone-500">## Canonical Examples (IMITATE these patterns)</span>
+- [pattern description]: [specific file path]
+
+<span class="text-stone-500">## Legacy Code (DO NOT imitate these patterns)</span>
+- [file path] # [why it's legacy]
+```
+
+<span class="text-stone-500">### 2. Hook Patterns</span>
+For any legacy pattern detectable by regex, suggest entries for
+the BANNED_PATTERNS array in block-slop-tests.sh.
+
+<span class="text-stone-500">### 3. Decision Log Entries</span>
+Generate dated entries for decisions.md documenting each
+selection with rationale from the human's choices.
+
+<span class="text-stone-500">## Rules</span>
+- Only report families where GENUINE competing approaches exist
+- Don't manufacture conflicts. If one consistent approach exists, say so
+- Always show real file paths and real code from this repo
+- Use git log to determine recency, don't guess
+- Present your assessment but DEFER to the human's selection
+- If the codebase is large, start with the areas of most inconsistency</code></pre>
+      <p class="text-xs font-semibold text-stone-500 mb-1 mt-4 uppercase tracking-wide">Create the skill:</p>
+      <pre class="bg-stone-800 text-stone-100 rounded-lg p-4 text-xs overflow-x-auto"><code>mkdir -p .claude/skills/assess-patterns
+<span class="text-stone-500"># paste the content above into .claude/skills/assess-patterns/SKILL.md</span></code></pre>
+    </div>
+
+    <!-- How it works -->
+    <div class="mb-8">
+      <h3 class="font-bold text-sm mb-4">What the workflow looks like</h3>
+
+      <div class="space-y-3">
+        <div class="flex items-start gap-3 bg-white border border-stone-200 rounded-lg p-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</span>
+          <div>
+            <p class="font-semibold text-stone-800 text-sm">You run <code class="bg-stone-100 px-1 py-0.5 rounded text-xs">/assess-patterns</code></p>
+            <p class="text-xs text-stone-500 mt-1">Or scope it: <code class="bg-stone-100 px-1 py-0.5 rounded">/assess-patterns auth</code> to focus on authentication only</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-white border border-stone-200 rounded-lg p-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</span>
+          <div>
+            <p class="font-semibold text-stone-800 text-sm">Claude scans your codebase and presents competing patterns</p>
+            <p class="text-xs text-stone-500 mt-1">For each pattern family, it shows real file paths, code snippets, git recency, and occurrence counts. Example output:</p>
+            <pre class="bg-stone-100 rounded p-3 text-xs overflow-x-auto leading-relaxed mt-2"><code><span class="text-stone-500">## Authentication</span>
+
+<span class="text-stone-800 font-semibold">Approach A: Devise + custom controller overrides</span>
+Files: app/controllers/users/sessions_controller.rb,
+       app/controllers/users/registrations_controller.rb
+Last modified: 8 months ago
+Occurrences: 4 controllers
+Example:
+  class Users::SessionsController &lt; Devise::SessionsController
+    def create
+      super do |resource|
+        track_login(resource)
+      end
+    end
+  end
+
+<span class="text-stone-800 font-semibold">Approach B: AuthService with JWT</span>
+Files: app/services/auth_service.rb,
+       app/controllers/api/v2/auth_controller.rb
+Last modified: 2 weeks ago
+Occurrences: 2 files (service + controller)
+Example:
+  class AuthService
+    def authenticate(email, password)
+      user = User.authenticate_by(email:, password:)
+      { token: generate_jwt(user), user: } if user
+    end
+  end
+
+<span class="text-stone-800 font-semibold">Assessment:</span> Approach B is newer, cleaner separation of
+concerns. Approach A has Devise coupling that makes testing
+harder. Git history shows Approach B was introduced in PR #142
+but migration is incomplete &mdash; API uses B, web still uses A.
+
+<span class="text-indigo-600 font-semibold">Which should be canonical? Which is legacy?</span></code></pre>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-white border border-stone-200 rounded-lg p-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</span>
+          <div>
+            <p class="font-semibold text-stone-800 text-sm">You select: "B is canonical, A is legacy"</p>
+            <p class="text-xs text-stone-500 mt-1">Repeat for each pattern family Claude surfaces. Skip any that aren't relevant.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-white border border-stone-200 rounded-lg p-4">
+          <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</span>
+          <div>
+            <p class="font-semibold text-stone-800 text-sm">Claude generates your CLAUDE.md, hook rules, and decision log</p>
+            <p class="text-xs text-stone-500 mt-1">Ready to paste. All three artifacts come from your selections, grounded in real code from your repo.</p>
+            <pre class="bg-stone-100 rounded p-3 text-xs overflow-x-auto leading-relaxed mt-2"><code><span class="text-stone-500">## Generated CLAUDE.md entries:</span>
+
+<span class="text-stone-500">## Canonical Examples (IMITATE these patterns)</span>
+- Authentication: app/services/auth_service.rb
+- API auth controller: app/controllers/api/v2/auth_controller.rb
+
+<span class="text-stone-500">## Legacy Code (DO NOT imitate these patterns)</span>
+- app/controllers/users/sessions_controller.rb <span class="text-stone-500"># Devise overrides, being replaced by AuthService</span>
+- app/controllers/users/registrations_controller.rb <span class="text-stone-500"># same Devise pattern</span>
+
+<span class="text-stone-500">## Generated decisions.md entry:</span>
+
+<span class="text-stone-500">## 2026-02-08: Authentication pattern</span>
+Decision: Use AuthService (app/services/auth_service.rb), not Devise controller overrides.
+Reason: Cleaner separation, testable without Devise coupling.
+Migration started in PR #142, API endpoints already converted.
+Remaining: web login/registration controllers.
+
+<span class="text-stone-500">## Generated BANNED_PATTERNS entry:</span>
+
+"Devise::SessionsController"
+"Devise::RegistrationsController"</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Why this works -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-5 mb-6">
+      <p class="font-semibold text-indigo-900 text-sm mb-2">Why this is better than manual auditing</p>
+      <ul class="list-disc list-inside space-y-1 text-indigo-800 text-sm">
+        <li><strong>The AI finds patterns you didn't know about.</strong> It scans every file. You scan the ones you remember.</li>
+        <li><strong>Git recency replaces tribal knowledge.</strong> Instead of asking "which auth pattern is current?", the tool checks commit dates.</li>
+        <li><strong>The human stays in control.</strong> The AI surfaces and assesses. You decide. Your judgment, AI's legwork.</li>
+        <li><strong>Artifacts are immediately actionable.</strong> The output is CLAUDE.md text, hook rules, and decision log entries. Not a report you have to act on later.</li>
+      </ul>
+    </div>
+
+    <!-- Running it incrementally -->
+    <div class="bg-white border border-stone-200 rounded-lg p-5 mb-6">
+      <p class="font-semibold text-stone-800 text-sm mb-2">Run it incrementally, not all at once</p>
+      <div class="space-y-2 text-sm text-stone-600">
+        <p>Don't try to assess your entire codebase in one session. Focus on one area at a time:</p>
+        <pre class="bg-stone-100 rounded p-3 text-xs overflow-x-auto leading-relaxed"><code><span class="text-stone-500"># Week 1: Focus on the area that burns you most</span>
+/assess-patterns auth
+
+<span class="text-stone-500"># Week 2: Test patterns (where AI slop is worst)</span>
+/assess-patterns testing
+
+<span class="text-stone-500"># Week 3: Data access and service layer</span>
+/assess-patterns data-access
+
+<span class="text-stone-500"># Week 4: Everything else</span>
+/assess-patterns all</code></pre>
+        <p>Each run adds entries to your CLAUDE.md and decision log. Your guardrails accumulate session by session.</p>
+      </div>
+    </div>
+
+    <!-- Re-run over time -->
+    <div class="bg-white border border-stone-200 rounded-lg p-5">
+      <p class="font-semibold text-stone-800 text-sm mb-2">Re-assess as the codebase evolves</p>
+      <div class="space-y-2 text-sm text-stone-600">
+        <p>Run <code class="bg-stone-100 px-1 py-0.5 rounded text-xs">/assess-patterns</code> again in 3 months. As you clean up legacy code and introduce new patterns, the assessment changes. Patterns that were "2 competing approaches" become "1 canonical approach." New inconsistencies surface where developers went off-path. Your CLAUDE.md evolves with your codebase because the tool reads what's actually there, not what was there 6 months ago.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- RAG Is Dead -->
 <section id="rag" class="py-10 px-4 border-t border-stone-200">
   <div class="max-w-3xl mx-auto">
@@ -439,13 +688,20 @@ exit 0</code></pre>
       <div class="space-y-3 text-sm text-stone-600 leading-relaxed">
         <p>Now that the AI isn't making things worse, identify the <strong>decision points</strong>&mdash;places where the mess has multiple paths and someone needs to know which one is current.</p>
 
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-3">
+          <p class="text-amber-800 text-sm"><strong>Don't do this manually.</strong> Use the <a href="#assess" class="text-indigo-600 underline font-semibold">/assess-patterns skill</a> above to have Claude scan your codebase, surface competing patterns, and present them for your selection. It generates CLAUDE.md entries, hook rules, and decision log entries from your choices.</p>
+        </div>
+
         <div class="bg-stone-100 rounded-lg p-5">
           <ol class="list-decimal list-inside space-y-3">
             <li>
-              <strong>Expand the "canonical vs. legacy" map in CLAUDE.md.</strong> For every major pattern (auth, data access, error handling, test structure, API responses), pick the ONE file that represents the current way. Be explicit about what's legacy.
+              <strong>Run <code>/assess-patterns</code> on one area at a time.</strong> Start with auth, then testing, then data access. Each run adds to your CLAUDE.md and decision log. Don't try to map the whole codebase at once.
             </li>
             <li>
-              <strong>Start a decision log.</strong> One markdown file. Every time you or the AI makes a choice between competing patterns, write it down with a date, the decision, and why.
+              <strong>Review and adjust the generated artifacts.</strong> The AI's assessment is a starting point. You know things it doesn't&mdash;upcoming migrations, business constraints, team preferences. Edit the generated CLAUDE.md entries before committing them.
+            </li>
+            <li>
+              <strong>Start a decision log.</strong> The skill generates entries, but keep adding manually too. Every time you or the AI makes a choice between competing patterns, write it down with a date, the decision, and why.
               <pre class="bg-stone-200 rounded p-3 mt-2 text-xs overflow-x-auto leading-relaxed"><code># decisions.md
 
 ## 2026-02-07: Auth pattern
@@ -453,20 +709,22 @@ Decision: Use AuthService (app/services/auth_service.rb),
 not the Authenticatable concern.
 Reason: The concern mixes session and token auth.
 AuthService separates them. See PR #142.
+Source: /assess-patterns auth
 
 ## 2026-02-08: Test style
 Decision: Minitest with behavioral descriptions.
 Reason: Column-level assertions don't catch real bugs.
-Canonical example: test/models/order_test.rb</code></pre>
+Canonical example: test/models/order_test.rb
+Source: /assess-patterns testing</code></pre>
             </li>
             <li>
-              <strong>Add no-fly zones to CLAUDE.md</strong> for files that look simple but have hidden dependencies. Name them explicitly. Claude reads CLAUDE.md on every session.
+              <strong>Add no-fly zones to CLAUDE.md</strong> for files that look simple but have hidden dependencies. The assessment skill will flag files with heavy coupling, but you'll know about the truly dangerous ones that require human judgment.
             </li>
           </ol>
         </div>
 
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-2">
-          <p class="text-amber-800 text-sm"><strong>Why this matters:</strong> The AI can read your entire codebase. The problem isn't access&mdash;it's signal-to-noise. When three patterns exist for the same thing, the AI needs a human to say "this one." That's what CLAUDE.md does. Not documentation. <strong>Disambiguation.</strong></p>
+          <p class="text-amber-800 text-sm"><strong>Why this matters:</strong> The AI can read your entire codebase. The problem isn't access&mdash;it's signal-to-noise. When three patterns exist for the same thing, the AI needs a human to say "this one." The assessment skill surfaces the conflicts. You make the calls. CLAUDE.md records them. <strong>AI legwork, human judgment.</strong></p>
         </div>
       </div>
     </div>
@@ -611,6 +869,11 @@ Canonical example: test/models/order_test.rb</code></pre>
             <td class="px-4 py-3">Day 1</td>
           </tr>
           <tr class="bg-stone-50">
+            <td class="px-4 py-3 font-semibold text-stone-800">/assess-patterns</td>
+            <td class="px-4 py-3"><strong>AI-powered codebase audit.</strong> Scans for competing patterns, surfaces them with git recency and code examples, lets you designate canonical vs. legacy, generates CLAUDE.md and hook rules.</td>
+            <td class="px-4 py-3">Day 1</td>
+          </tr>
+          <tr class="bg-white">
             <td class="px-4 py-3 font-semibold text-stone-800">PreToolUse Hooks</td>
             <td class="px-4 py-3"><strong>Block slop before it lands.</strong> Inspect file content before writes. Deny patterns that match known anti-patterns. Protect sensitive files with confirmation prompts.</td>
             <td class="px-4 py-3">Day 1</td>
